@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* CSS RIÊNG CHO SIDEBAR */
+    .admin-container {
+        display: flex;
+        min-height: calc(100vh - 56px); /* Trừ đi chiều cao thanh Navbar trên cùng */
+    }
+
+    .sidebar {
+        width: 260px;
+        background: #ffffff;
+        border-right: 1px solid #e9ecef;
+        padding: 20px 15px;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.03);
+    }
+
+    .sidebar-heading {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #adb5bd;
+        font-weight: 700;
+        margin-bottom: 10px;
+        margin-top: 20px;
+        padding-left: 10px;
+    }
+
+    /* Link mặc định */
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: #555;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    /* Hiệu ứng khi di chuột */
+    .sidebar-link:hover {
+        background-color: #f8f9fa;
+        color: #0d6efd; /* Màu xanh dương */
+        transform: translateX(5px); /* Đẩy nhẹ sang phải */
+    }
+
+    /* Link đang Active (Đang chọn) */
+    .sidebar-link.active {
+        background-color: #e3f2fd; /* Nền xanh pastel giống bảng câu hỏi */
+        color: #0d47a1;            /* Chữ xanh đậm */
+        font-weight: 700;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .sidebar-link i {
+        width: 25px; /* Để icon thẳng hàng */
+        font-size: 1.1rem;
+    }
+
+    .content-area {
+        flex: 1; /* Chiếm hết phần còn lại */
+        padding: 30px;
+        background-color: #f8f9fc; /* Nền xám rất nhạt cho nội dung nổi bật */
+        display: flex;
+        flex-direction: column;
+    }
+    .admin-footer {
+        margin-top: auto; /* Quan trọng: Tự động đẩy footer xuống đáy nếu nội dung ngắn */
+        padding-top: 20px;
+        border-top: 1px solid #e3e6f0; /* Kẻ đường viền mờ ngăn cách */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #0d1fa7; /* Màu chữ xám chuyên nghiệp */
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    /* NÚT SCROLL TO TOP */
+    .btn-scroll-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background-color: #0d6efd; /* Màu xanh chủ đạo */
+        color: white;
+        border-radius: 50%; /* Bo tròn xoe */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4); /* Bóng xanh mờ ảo */
+        opacity: 0; /* Mặc định ẩn đi */
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000; /* Nổi lên trên tất cả */
+        border: 2px solid white; /* Viền trắng nhỏ cho nổi */
+    }
+
+    .btn-scroll-top:hover {
+        background-color: #0b5ed7;
+        color: white;
+        transform: translateY(-5px); /* Bay lên nhẹ khi di chuột */
+    }
+
+    /* Class này sẽ được JS thêm vào khi cuộn xuống */
+    .btn-scroll-top.show {
+        opacity: 1;
+        visibility: visible;
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="admin-container">
+        <div class="sidebar d-none d-md-block"> <div class="sidebar-heading">Quản lý chung</div>
+            
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-chart-pie"></i> Tổng quan
+            </a>
+            
+            <a href="{{ url_for('admin.manage_questions') }}" class="sidebar-link active">
+                <i class="fas fa-database"></i> Ngân hàng câu hỏi
+            </a>
+            
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-users"></i> Quản lý học sinh
+            </a>
+
+
+        </div>
+
+        <div class="content-area">
+            {% block admin_content %}{% endblock %}
+            <footer class="admin-footer">
+                <div>
+                    <span>Copyright &copy; 2025 <b>AI TIN HỌC</b>. All rights reserved.</span>
+                </div>
+                <div>
+                    <span class="me-3">Phiên bản 1.0.0 (Beta)</span>
+                    <a href="#" class="text-decoration-none text-muted me-2">Điều khoản</a>
+                    <a href="#" class="text-decoration-none text-muted">Bảo mật</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+<a href="#" class="btn-scroll-top" id="scrollTopBtn">
+    <i class="fas fa-arrow-up fa-lg"></i>
+</a>
+
+<script>
+    // 1. Lấy cái nút ra
+    const scrollTopBtn = document.getElementById("scrollTopBtn");
+
+    // 2. Lắng nghe sự kiện cuộn chuột
+    window.onscroll = function() {
+        // Nếu cuộn xuống quá 300px thì hiện nút
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            scrollTopBtn.classList.add("show");
+        } else {
+            scrollTopBtn.classList.remove("show");
+        }
+    };
+
+    // 3. Xử lý khi bấm nút -> Cuộn mượt lên đầu
+    scrollTopBtn.addEventListener("click", function(e) {
+        e.preventDefault(); // Chặn hành động nhảy trang mặc định
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth" // Hiệu ứng trượt mượt mà
+        });
+    });
+</script>
+{% endblock %}
