@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block layout %}
+    <div class="d-flex">
+        <div class="sidebar bg-dark text-white" style="width: 250px; min-height: 100vh;">
+            <h2>Menu Admin</h2>
+        </div>
+        <div class="content p-4">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+{% endblock %}

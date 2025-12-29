@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+instance/
+.env
+database/*.db
+*.pyc
+# Các file cấu hình của VS Code
+.vscode/
+
+# Các file rác của MacOS (nếu có thành viên dùng Mac)
+.DS_Store
+
+# Thư mục build (nếu sau này bạn đóng gói ứng dụng)
+build/
+dist/
