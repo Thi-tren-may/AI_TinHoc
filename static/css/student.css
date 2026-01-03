@@ -1,0 +1,203 @@
+/* --- PHẦN STYLE CHO CÂU HỎI SAI (NEW) --- */
+
+/* 1. Thẻ Card chứa câu sai: Thêm vạch đỏ bên trái cho chuyên nghiệp */
+/* --- UPDATE: THẺ CÂU SAI PHIÊN BẢN PRO MAX --- */
+
+.wrong-card {
+    /* 1. Copy y nguyên thông số của thẻ Card bên trên */
+    background: white;
+    border: none;
+    border-radius: 20px; /* Bo góc to cho mềm mại */
+    
+    /* 2. Tạo hiệu ứng đổ bóng sâu (Deep Shadow) để tạo cảm giác 3D */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08); 
+    
+    /* 3. Vạch đỏ tinh tế hơn (Cong theo góc thẻ) */
+    border-left: 6px solid #ff4757;
+    overflow: hidden; /* Để vạch đỏ không bị lòi ra ngoài góc bo */
+
+    padding: 25px;
+    margin-bottom: 25px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Hiệu ứng chuyển động mượt */
+}
+
+/* 4. Hiệu ứng khi di chuột vào (Bay lên cao hơn) */
+.wrong-card:hover {
+    transform: translateY(-7px); /* Bay lên cao hơn chút nữa */
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15); /* Bóng đổ đậm hơn */
+}
+
+/* 5. Tiêu đề câu hỏi */
+.question-title {
+    color: #2d3748;
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 15px;
+}
+/* 3. Khu vực chứa các nhãn (Badge) */
+.meta-info {
+    display: flex;
+    gap: 12px; /* Khoảng cách giữa các nhãn */
+    margin-bottom: 20px;
+    flex-wrap: wrap; /* Tự xuống dòng nếu màn hình nhỏ */
+}
+
+/* Style lại Badge cho xịn (Có viền nhẹ) */
+.custom-badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+}
+
+/* Màu sắc cụ thể cho từng loại */
+.badge-wrong {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+.badge-right {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-color: #a7f3d0;
+}
+
+.badge-level {
+    background-color: #f3f4f6;
+    color: #374151;
+    border-color: #e5e7eb;
+}
+
+/* 4. Nút bấm AI "Thần thánh" */
+.btn-ai-pro {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); /* Màu tím AI hiện đại */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px; /* Bo tròn kiểu viên thuốc */
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); /* Hiệu ứng phát sáng */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-ai-pro:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5);
+    color: white;
+}
+/* --- STYLE CHO TRANG CHỦ (HOMEPAGE) --- */
+
+/* Màu nền icon nhạt */
+.bg-primary-soft { background-color: #e0e7ff; }
+.bg-success-soft { background-color: #d1fae5; }
+.bg-warning-soft { background-color: #fef3c7; }
+
+/* Hiệu ứng thẻ Card bay lên */
+.hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+}
+
+/* Hiệu ứng nút bấm nhanh */
+.hover-up {
+    transition: transform 0.2s;
+}
+.hover-up:hover {
+    transform: scale(1.02);
+}
+/* =========================================
+   PRO NAVBAR STYLES (Giao diện Menu 10 điểm)
+   ========================================= */
+
+/* 1. Thanh Navbar chính */
+.pro-navbar {
+    /* Gradient 3 màu phong phú hơn, sâu hơn */
+    background: linear-gradient(120deg, #2563eb 0%, #7c3aed 50%, #a855f7 100%);
+    /* Hiệu ứng kính mờ phía sau (Glassmorphism) */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); /* Cho Safari */
+    /* Đường viền sáng mỏng bên dưới */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Bóng đổ mềm */
+    transition: all 0.3s ease;
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+}
+
+/* 2. Các liên kết trong menu (nav-link-pro) */
+.nav-link-pro {
+    font-weight: 500;
+    padding: 0.6rem 1.2rem !important; /* Tăng padding để nút to hơn */
+    border-radius: 50px; /* Bo tròn dạng viên thuốc */
+    margin: 0 4px; /* Khoảng cách giữa các nút */
+    color: rgba(255, 255, 255, 0.9) !important; /* Màu chữ trắng mờ */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Hiệu ứng chuyển động mượt */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hiệu ứng khi rê chuột (Hover) và nút đang chọn (Active) */
+.nav-link-pro:hover,
+.nav-link-pro.active {
+    background-color: rgba(255, 255, 255, 0.2); /* Nền trắng trong suốt */
+    color: #ffffff !important; /* Chữ trắng sáng */
+    transform: translateY(-2px); /* Nổi lên nhẹ */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Bóng đổ nhẹ khi nổi lên */
+}
+
+.nav-link-pro.active {
+    font-weight: 700;
+    background-color: rgba(255, 255, 255, 0.25); /* Active thì nền sáng hơn chút */
+}
+
+/* Hiệu ứng icon lắc lư khi hover */
+.nav-link-pro i {
+    transition: transform 0.3s ease;
+}
+.nav-link-pro:hover i {
+    transform: rotate(-10deg) scale(1.1); /* Xoay nhẹ và phóng to icon */
+}
+
+/* 3. Khu vực thông tin User (Thẻ kính) */
+.user-glass-card {
+    /* Nền kính trong suốt */
+    background: rgba(255, 255, 255, 0.15);
+    /* Viền sáng mờ */
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(5px);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05); /* Bóng đổ vào trong */
+    transition: all 0.3s ease;
+}
+
+.user-glass-card:hover {
+    background: rgba(255, 255, 255, 0.25); /* Sáng hơn khi hover */
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Avatar phát sáng */
+.avatar-glow {
+    border: 3px solid rgba(255, 255, 255, 0.9); /* Viền trắng dày */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); /* Hiệu ứng hào quang */
+    transition: all 0.3s ease;
+}
+
+.user-glass-card:hover .avatar-glow {
+    transform: scale(1.05); /* Phóng to nhẹ */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); /* Hào quang mạnh hơn */
+}
+
+/* Tùy chỉnh nút toggle trên mobile */
+.navbar-toggler:focus {
+    box-shadow: none; /* Bỏ viền xanh mặc định khi bấm */
+}
