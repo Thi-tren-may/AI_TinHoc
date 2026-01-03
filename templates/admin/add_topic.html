@@ -1,0 +1,87 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="container-fluid animate-fade-in px-4">
+    <div class="card card-pro border-0 shadow-lg mt-4">
+        
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold text-uppercase fs-6">
+                <i class="fas fa-folder-plus me-2"></i> THÊM CHỦ ĐỀ MỚI
+            </h5>
+            <a href="{{ url_for('admin.manage_topics') }}" class="btn btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i> Quay lại
+            </a>
+        </div>
+        
+        <div class="card-body p-4">
+            <form method="post">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold text-primary">
+                            <i class="fas fa-tag me-1"></i> TÊN CHỦ ĐỀ
+                        </label>
+                        <input type="text" name="name" class="form-control bg-light py-2" placeholder="Ví dụ: Trí tuệ nhân tạo..." required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-primary">
+                            <i class="fas fa-project-diagram me-1"></i> CẤP ĐỘ
+                        </label>
+                        <select name="level" id="levelSelect" class="form-select bg-light py-2 fw-bold text-dark" onchange="toggleParent()">
+                            <option value="small">🔹 Chủ đề Nhỏ (Con)</option>
+                            <option value="large">🔶 Chủ đề Lớn (Cha)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-4" id="parentSelectDiv">
+                    <div class="col-12">
+                        <div class="p-3 bg-light rounded border">
+                            <label class="form-label fw-bold text-success mb-2">
+                                <i class="fas fa-folder-open me-1"></i> THUỘC CHỦ ĐỀ LỚN NÀO?
+                            </label>
+                            <select name="parent_id" class="form-select border-success">
+                                {% for p in large_topics %}
+                                <option value="{{ p['Id'] }}">{{ p['Name'] }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text mt-2"><i class="fas fa-info-circle"></i> Câu hỏi sẽ được phân loại vào chủ đề này.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4 text-muted">
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success fw-bold py-2 px-5 shadow">
+                        <i class="fas fa-save me-2"></i> LƯU CHỦ ĐỀ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleParent() {
+        var level = document.getElementById("levelSelect").value;
+        var parentDiv = document.getElementById("parentSelectDiv");
+        
+        if (level === "large") {
+            parentDiv.style.display = "none";
+        } else {
+            parentDiv.style.display = "block";
+            // Animation nhẹ
+            parentDiv.style.opacity = 0;
+            setTimeout(() => {
+                parentDiv.style.transition = "opacity 0.3s";
+                parentDiv.style.opacity = 1;
+            }, 10);
+        }
+    }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleParent();
+    });
+</script>
+{% endblock %}

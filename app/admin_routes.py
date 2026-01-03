@@ -2,7 +2,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 # 👇 IMPORT QUAN TRỌNG: Gọi file service vào để dùng
 from app import question_service 
-
+from app import student_service   # 👇 CÁI MỚI (quản lý học sinh)
+from app import topic_service
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 # 1. TRANG DANH SÁCH
@@ -76,3 +77,111 @@ def test_generate(topic_id):
         "message": f"Sinh thành công {len(questions)} câu hỏi",
         "questions": questions
     }
+# =========================================================
+# 👇 PHẦN QUẢN LÝ HỌC SINH (GỌI SANG STUDENT_SERVICE)
+# =========================================================
+
+# 1. DANH SÁCH HỌC SINH
+@admin_bp.route('/students')
+def manage_students():
+    # Gọi service mới
+    students = student_service.get_all_students()
+    return render_template('admin/manage_students.html', students=students)
+
+# 2. THÊM HỌC SINH
+@admin_bp.route('/student/add', methods=('GET', 'POST'))
+def add_student():
+    if request.method == 'POST':
+        # Gọi service mới để thêm
+        success = student_service.add_new_student(
+            username=request.form['username'],
+            password=request.form['password'],
+            grade=request.form['grade']
+        )
+        
+        if success:
+            flash('Thêm học sinh thành công!', 'success')
+            return redirect(url_for('admin.manage_students'))
+        else:
+            flash('Lỗi! Tên đăng nhập đã tồn tại.', 'danger')
+            
+    return render_template('admin/add_student.html')
+
+# 3. SỬA HỌC SINH
+@admin_bp.route('/student/edit/<int:id>', methods=('GET', 'POST'))
+def edit_student(id):
+    # Lấy thông tin học sinh cũ
+    student = student_service.get_student_by_id(id)
+    
+    if request.method == 'POST':
+        # Gọi service mới để sửa
+        student_service.update_student(
+            user_id=id,
+            username=request.form['username'],
+            grade=request.form['grade'],
+            password=request.form['password']
+        )
+        flash('Cập nhật thông tin thành công!', 'success')
+        return redirect(url_for('admin.manage_students'))
+        
+    return render_template('admin/edit_student.html', student=student)
+
+# 4. XÓA HỌC SINH
+@admin_bp.route('/student/delete/<int:id>')
+def delete_student(id):
+    student_service.delete_student(id)
+    flash('Đã xóa học sinh!', 'success')
+    return redirect(url_for('admin.manage_students'))
+# =========================================================
+# 👇 PHẦN QUẢN LÝ CHỦ ĐỀ (YÊU CẦU CỦA S3)
+# =========================================================
+
+# 1. DANH SÁCH CHỦ ĐỀ
+@admin_bp.route('/topics')
+def manage_topics():
+    topics = topic_service.get_all_topics()
+    return render_template('admin/manage_topics.html', topics=topics)
+
+# 2. THÊM CHỦ ĐỀ
+@admin_bp.route('/topic/add', methods=('GET', 'POST'))
+def add_topic():
+    if request.method == 'POST':
+        name = request.form['name']
+        level = request.form['level']
+        # Nếu chọn large thì parent_id là None, nếu small thì lấy từ form
+        parent_id = request.form.get('parent_id') if level == 'small' else None
+        
+        topic_service.add_new_topic(name, level, parent_id)
+        flash('Thêm chủ đề thành công!', 'success')
+        return redirect(url_for('admin.manage_topics'))
+        
+    # Lấy danh sách chủ đề lớn để hiển thị trong select box
+    large_topics = topic_service.get_large_topics()
+    return render_template('admin/add_topic.html', large_topics=large_topics)
+
+# 3. SỬA CHỦ ĐỀ
+@admin_bp.route('/topic/edit/<int:id>', methods=('GET', 'POST'))
+def edit_topic(id):
+    topic = topic_service.get_topic_by_id(id)
+    
+    if request.method == 'POST':
+        name = request.form['name']
+        level = request.form['level']
+        parent_id = request.form.get('parent_id') if level == 'small' else None
+        
+        topic_service.update_topic(id, name, level, parent_id)
+        flash('Cập nhật chủ đề thành công!', 'success')
+        return redirect(url_for('admin.manage_topics'))
+
+    large_topics = topic_service.get_large_topics()
+    return render_template('admin/edit_topic.html', topic=topic, large_topics=large_topics)
+
+# 4. XÓA CHỦ ĐỀ
+@admin_bp.route('/topic/delete/<int:id>')
+def delete_topic(id):
+    success = topic_service.delete_topic(id)
+    if success:
+        flash('Đã xóa chủ đề!', 'success')
+    else:
+        flash('Không thể xóa! Chủ đề này đang chứa câu hỏi hoặc dữ liệu khác.', 'danger')
+    return redirect(url_for('admin.manage_topics'))

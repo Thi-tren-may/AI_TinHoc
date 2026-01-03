@@ -1,93 +1,75 @@
-{% extends "admin/base_admin.html" %} {% block admin_content %}
+{% extends "admin/base_admin.html" %} 
+
+{% block admin_content %}
 <style>
-  /* 1. Hiệu ứng Card nổi khối */
+  /* --- 1. Hiệu ứng Card nổi khối --- */
   .card-pro {
     border: none;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Bóng mờ sang trọng */
-    overflow: hidden; /* Để bo góc không bị chờm */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
     transition: transform 0.3s ease;
+    background-color: #fff;
   }
 
-  /* 2. Màu tiêu đề bảng */
-  /* 2. Màu tiêu đề bảng: Xanh nhạt nền nã - Chữ đậm sắc nét */
+  /* --- 2. HEADER BẢNG (ĐẬM CHUẨN) --- */
   .bg-gradient-primary th {
-    background-color: #e3f2fd !important; /* Nền Xanh dương rất nhạt */
-    color: #0d47a1 !important; /* Chữ Xanh than đậm */
-    border-bottom: 2px solid #90caf9 !important; /* Đường kẻ xanh */
-    font-weight: 800;
+    background-color: #e3f2fd !important; /* Nền Xanh dương nhạt */
+    color: #0d47a1 !important; /* Chữ Xanh đậm */
+    border-bottom: 2px solid #90caf9 !important;
+    font-weight: 900 !important; /* ĐẬM NHẤT */
     text-transform: uppercase;
-  }
-
-  /* 3. Hiệu ứng Nút bấm "Nảy" khi di chuột */
-  .btn-hover-effect {
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-  }
-  .btn-hover-effect:hover {
-    transform: translateY(-2px); /* Nhấc nút lên 2px */
-    box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
-  }
-
-  /* 4. Hiệu ứng bảng */
-  .table-pro thead th {
-    border-top: none;
-    border-bottom: none;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
+    vertical-align: middle;
     letter-spacing: 0.5px;
   }
-  .table-pro tbody tr {
-    transition: background-color 0.2s ease;
+
+  /* --- 3. Hiệu ứng Nút bấm --- */
+  .btn-hover-effect {
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
-  .table-pro tbody tr:hover {
-    background-color: #f8f9fc; /* Đổi màu nền nhẹ khi di chuột vào dòng */
+  .btn-hover-effect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
   }
 
-  /* 5. Căn chỉnh Badge (Nhãn mức độ) */
+  /* --- 4. Hiệu ứng Bảng So le (Zebra) --- */
+  .table-pro thead th {
+    border: none;
+    font-size: 0.85rem;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+  .table-pro tbody tr:nth-of-type(even) {
+    background-color: #fbfcfd;
+  }
+  .table-pro tbody tr:hover {
+    background-color: #f1f3f5 !important;
+  }
+
+  /* --- 5. Badge (Nhãn) --- */
   .badge-pro {
     padding: 0.5em 0.8em;
-    font-weight: 500;
+    font-weight: 700;
+    font-size: 0.75rem;
     letter-spacing: 0.3px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 </style>
 
-<div class="container mt-4 animate-fade-in">
-  {% with messages = get_flashed_messages(with_categories=true) %} {% if
-  messages %} {% for category, message in messages %}
-  <div
-    class="alert alert-{{ category }} alert-dismissible fade show shadow-sm rounded-3 mb-4"
-    role="alert"
-  >
-    <i class="fas fa-check-circle me-2"></i> {{ message }}
-    <button
-      type="button"
-      class="btn-close"
-      data-bs-dismiss="alert"
-      aria-label="Close"
-    ></button>
-  </div>
-  {% endfor %} {% endif %} {% endwith %}
-
-  <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid animate-fade-in px-4">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4 pt-3">
     <div>
-      <h2
-        class="text-primary fw-bold mb-0"
-        style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1)"
-      >
-        <i class="fas fa-desktop me-2"></i> Ngân hàng Câu hỏi
-      </h2>
-      <p class="text-muted mb-0 mt-1 small">
-        Quản lý toàn bộ câu hỏi trắc nghiệm của hệ thống
+      <h3 class="text-primary fw-bold mb-1">
+        <i class="fas fa-database me-2"></i> NGÂN HÀNG CÂU HỎI
+      </h3>
+      <p class="text-muted mb-0 small">
+        Quản lý và cập nhật kho dữ liệu trắc nghiệm
       </p>
     </div>
 
-    <a
-      href="{{ url_for('admin.add_question') }}"
-      class="btn btn-success btn-hover-effect rounded-pill px-4 py-2 fw-bold"
-    >
+    <a href="{{ url_for('admin.add_question') }}" class="btn btn-success btn-hover-effect rounded-pill px-4 py-2 fw-bold shadow-sm">
       <i class="fas fa-plus-circle me-2"></i> Thêm câu hỏi
     </a>
   </div>
@@ -96,78 +78,66 @@
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover table-pro mb-0 align-middle">
-          <thead
-            class="bg-gradient-primary text-center text-nowrap align-middle"
-          >
+          <thead class="bg-gradient-primary text-center text-nowrap">
             <tr>
-              <th style="width: 5%" class="py-3">ID</th>
-              <th style="width: 45%" class="text-start py-3">
-                Nội dung câu hỏi
-              </th>
-              <th style="width: 20%" class="py-3">Chủ đề</th>
-              <th style="width: 10%" class="py-3">Mức độ</th>
-              <th style="width: 8%" class="py-3">Đáp án</th>
-              <th style="width: 12%" class="py-3">Hành động</th>
+              <th style="width: 5%">ID</th>
+              <th style="width: 45%" class="text-start ps-3">NỘI DUNG CÂU HỎI</th>
+              <th style="width: 20%">CHỦ ĐỀ</th>
+              <th style="width: 10%">MỨC ĐỘ</th>
+              <th style="width: 8%">ĐÁP ÁN</th>
+              <th style="width: 12%">HÀNH ĐỘNG</th>
             </tr>
           </thead>
           <tbody>
             {% for q in questions %}
             <tr>
-              <td class="text-center fw-bold text-secondary">{{ q['Id'] }}</td>
+              <td class="text-center fw-bold text-secondary text-opacity-50">{{ q['Id'] }}</td>
 
-              <td>
-                <div
-                  class="text-dark fw-bold mb-1"
-                  style="max-width: 500px; white-space: normal"
-                >
+              <td class="ps-3">
+                <div class="text-dark fw-bold" style="max-width: 500px; white-space: normal; line-height: 1.5;">
                   {{ q['Content'] }}
                 </div>
               </td>
 
-              <td class="text-center text-muted small">{{ q['TopicName'] }}</td>
+              <td class="text-center">
+                 <span class="text-muted fw-bold small"><i class="fas fa-folder me-1 text-warning"></i> {{ q['TopicName'] }}</span>
+              </td>
 
               <td class="text-center">
                 {% if q['Difficulty'] == 1 %}
-                <span class="badge badge-pro bg-success rounded-pill">
-                  <i class="fas fa-check me-1"></i>Nhận biết
+                <span class="badge badge-pro bg-success rounded-pill text-white">
+                  <i class="fas fa-leaf me-1"></i>Nhận biết
                 </span>
                 {% elif q['Difficulty'] == 2 %}
                 <span class="badge badge-pro bg-warning text-dark rounded-pill">
-                  <i class="fas fa-star-half-alt me-1"></i>Thông hiểu
+                  <i class="fas fa-bolt me-1"></i>Thông hiểu
                 </span>
                 {% else %}
-                <span class="badge badge-pro bg-danger rounded-pill">
+                <span class="badge badge-pro bg-danger rounded-pill text-white">
                   <i class="fas fa-fire me-1"></i>Vận dụng
                 </span>
                 {% endif %}
               </td>
 
               <td class="text-center">
-                <span
-                  class="badge bg-light text-dark border fw-bold fs-6"
-                  style="width: 35px; height: 35px; line-height: 25px"
-                >
+                <span class="badge bg-white text-primary border border-primary fw-bold fs-6 shadow-sm" 
+                      style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">
                   {{ q['CorrectOption'] }}
                 </span>
               </td>
 
               <td class="text-center">
-                <a
-                  href="{{ url_for('admin.edit_question', id=q['Id']) }}"
-                  class="btn btn-warning btn-sm btn-hover-effect rounded-circle shadow-sm me-1"
-                  title="Sửa"
-                  style="width: 32px; height: 32px"
-                >
+                <a href="{{ url_for('admin.edit_question', id=q['Id']) }}" 
+                   class="btn btn-warning btn-sm btn-hover-effect rounded-circle shadow-sm me-1" 
+                   title="Sửa" style="width: 35px; height: 35px; line-height: 35px; padding: 0;">
                   <i class="fas fa-pen fa-xs text-white"></i>
                 </a>
 
-                <a
-                  href="{{ url_for('admin.delete_question', id=q['Id']) }}"
-                  class="btn btn-danger btn-sm btn-hover-effect rounded-circle shadow-sm"
-                  title="Xóa"
-                  onclick="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa câu hỏi này không? Hành động này không thể hoàn tác!');"
-                  style="width: 32px; height: 32px"
-                >
+                <a href="{{ url_for('admin.delete_question', id=q['Id']) }}" 
+                   class="btn btn-danger btn-sm btn-hover-effect rounded-circle shadow-sm" 
+                   title="Xóa" 
+                   onclick="return confirm('CẢNH BÁO: Xóa câu hỏi này sẽ mất vĩnh viễn. Bạn chắc chắn chứ?');"
+                   style="width: 35px; height: 35px; line-height: 35px; padding: 0;">
                   <i class="fas fa-trash fa-xs"></i>
                 </a>
               </td>
@@ -175,12 +145,11 @@
             {% else %}
             <tr>
               <td colspan="6" class="text-center py-5">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/7486/7486754.png"
-                  width="80"
-                  class="mb-3 opacity-50"
-                />
-                <p class="text-muted">Chưa có dữ liệu câu hỏi nào.</p>
+                <div class="text-muted opacity-50 mb-3">
+                    <i class="fas fa-inbox fa-4x"></i>
+                </div>
+                <h6 class="text-muted fw-bold">Chưa có dữ liệu câu hỏi nào.</h6>
+                <p class="small text-muted">Hãy bấm nút "Thêm câu hỏi" để bắt đầu.</p>
               </td>
             </tr>
             {% endfor %}

@@ -1,0 +1,129 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="container-fluid animate-fade-in px-4">
+    <div class="card card-pro border-0 shadow-lg mt-4">
+        
+        <div class="card-header bg-warning d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold text-dark text-uppercase fs-6">
+                <i class="fas fa-edit me-2"></i> CHỈNH SỬA CHỦ ĐỀ #{{ topic['Id'] }}
+            </h5>
+            
+            <a href="{{ url_for('admin.manage_topics') }}" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i> Quay lại
+            </a>
+        </div>
+        
+        <div class="card-body p-4">
+            <form method="post" id="editForm">
+                
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold text-primary">
+                            <i class="fas fa-tag me-1"></i> TÊN CHỦ ĐỀ
+                        </label>
+                        <input type="text" name="name" id="nameInput" class="form-control bg-light py-2" value="{{ topic['Name'] }}" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-primary">
+                            <i class="fas fa-project-diagram me-1"></i> CẤP ĐỘ
+                        </label>
+                        <select name="level" id="levelSelect" class="form-select bg-light py-2 fw-bold text-dark" onchange="toggleParent()">
+                            <option value="small" {% if topic['Level'] == 'small' %}selected{% endif %}>🔹 Chủ đề Nhỏ (Con)</option>
+                            <option value="large" {% if topic['Level'] == 'large' %}selected{% endif %}>🔶 Chủ đề Lớn (Cha)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-4" id="parentSelectDiv">
+                    <div class="col-12">
+                        <div class="p-3 bg-light rounded border">
+                            <label class="form-label fw-bold text-dark mb-2">
+                                <i class="fas fa-folder-open me-1"></i> THUỘC CHỦ ĐỀ LỚN NÀO?
+                            </label>
+                            <select name="parent_id" id="parentSelect" class="form-select border-warning">
+                                {% for p in large_topics %}
+                                    {% if p['Id'] != topic['Id'] %}
+                                        <option value="{{ p['Id'] }}" {% if topic['ParentId'] == p['Id'] %}selected{% endif %}>
+                                            {{ p['Name'] }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4 text-muted">
+
+                <div class="d-flex justify-content-end align-items-center">
+                    <span id="changeMsg" class="text-muted fst-italic me-3 small" style="display:none;">
+                        <i class="fas fa-info-circle"></i> Bạn đã thay đổi thông tin
+                    </span>
+                    <button type="submit" id="saveBtn" class="btn btn-warning text-dark fw-bold py-2 px-5 shadow" disabled>
+                        <i class="fas fa-save me-2"></i> LƯU THAY ĐỔI
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Logic ẩn hiện chủ đề cha
+    function toggleParent() {
+        var level = document.getElementById("levelSelect").value;
+        var parentDiv = document.getElementById("parentSelectDiv");
+        
+        if (level === "large") {
+            parentDiv.style.display = "none";
+        } else {
+            parentDiv.style.display = "block";
+        }
+    }
+
+    // 2. LOGIC MỚI: Chỉ hiện nút Lưu khi có thay đổi
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleParent();
+
+        const form = document.getElementById('editForm');
+        const saveBtn = document.getElementById('saveBtn');
+        const msg = document.getElementById('changeMsg');
+        
+        // Lưu giá trị gốc
+        const initialData = {
+            name: document.getElementById('nameInput').value,
+            level: document.getElementById('levelSelect').value,
+            parent: document.getElementById('parentSelect') ? document.getElementById('parentSelect').value : null
+        };
+
+        function checkChanges() {
+            const currentData = {
+                name: document.getElementById('nameInput').value,
+                level: document.getElementById('levelSelect').value,
+                parent: document.getElementById('parentSelect') ? document.getElementById('parentSelect').value : null
+            };
+
+            const isChanged = (
+                currentData.name !== initialData.name || 
+                currentData.level !== initialData.level || 
+                currentData.parent !== initialData.parent
+            );
+
+            if (isChanged) {
+                saveBtn.disabled = false;
+                saveBtn.classList.remove('opacity-50');
+                msg.style.display = 'block';
+            } else {
+                saveBtn.disabled = true;
+                saveBtn.classList.add('opacity-50');
+                msg.style.display = 'none';
+            }
+        }
+
+        form.addEventListener('input', checkChanges);
+        form.addEventListener('change', checkChanges);
+    });
+</script>
+{% endblock %}
