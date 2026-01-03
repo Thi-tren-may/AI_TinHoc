@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="auth-page">
+    <div class="auth-box">
+
+        <!-- CỘT TRÁI – GIỐNG LOGIN -->
+        <div class="auth-info">
+            <h2>HỆ THỐNG ÔN TẬP TIN HỌC</h2>
+            <p>
+                Đăng ký tài khoản để luyện tập, làm bài kiểm tra,
+                theo dõi kết quả và cải thiện năng lực môn Tin học.
+            </p>
+
+            <div class="password-note">
+                <h4>Lưu ý mật khẩu</h4>
+                <ul>
+                    <li>Ít nhất 6 ký tự</li>
+                    <li>Có chữ cái (a–z)</li>
+                    <li>Có ít nhất 1 chữ số (0–9)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI – FORM ĐĂNG KÝ -->
+        <div class="auth-form">
+            <h3>Đăng ký tài khoản</h3>
+            <span class="subtitle">Dành cho học sinh THPT</span>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('auth.register') }}" autocomplete="off">
+                <div class="form-group">
+                    <label>Tên đăng nhập</label>
+                    <input type="text" name="username" required placeholder="vd: hs10_nguyenvana" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Khối lớp</label>
+                    <select name="grade">
+                        <option value="10">Khối 10</option>
+                        <option value="11">Khối 11</option>
+                        <option value="12">Khối 12</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" name="password" required placeholder="Nhập mật khẩu" autocomplete="new-password">
+                </div>
+
+                <button class="btn-submit">Tạo tài khoản</button>
+            </form>
+
+            <div class="form-footer">
+                Đã có tài khoản?
+                <a href="{{ url_for('auth.login') }}">Đăng nhập</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ===== NỀN ẢNH MỜ ===== */
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("https://via.placeholder.com/1920x1080");
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px) brightness(0.7);
+    transform: scale(1.1);
+    z-index: -1;
+}
+
+/* ===== BỐ CỤC CHUNG ===== */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-box {
+    width: 900px;
+    display: flex;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,.3);
+}
+
+/* ===== CỘT TRÁI ===== */
+.auth-info {
+    width: 42%;
+    background: linear-gradient(160deg, #0d6efd, #003c8f);
+    color: white;
+    padding: 40px;
+}
+
+.auth-info h2 {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.auth-info p {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.password-note {
+    margin-top: 30px;
+    background: rgba(255,255,255,0.15);
+    padding: 16px;
+    border-radius: 10px;
+}
+
+.password-note h4 {
+    margin-top: 0;
+    font-size: 15px;
+}
+
+.password-note ul {
+    padding-left: 18px;
+    font-size: 14px;
+}
+
+/* ===== CỘT PHẢI ===== */
+.auth-form {
+    width: 58%;
+    padding: 40px;
+}
+
+.subtitle {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* ===== FORM ===== */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 11px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #0d6efd;
+}
+
+/* ===== BUTTON ===== */
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background: #0d6efd;
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-submit:hover {
+    background: #0b5ed7;
+}
+
+/* ===== FOOTER ===== */
+.form-footer {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.form-footer a {
+    color: #0d6efd;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* ===== ALERT ===== */
+.alert {
+    background: #ffe6e6;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+</style>
+
+{% endblock %}

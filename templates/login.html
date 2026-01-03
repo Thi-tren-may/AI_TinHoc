@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="login-wrapper">
+    <div class="login-container">
+
+        <div class="login-header">
+            <h1>📘 HỆ THỐNG ÔN TẬP TIN HỌC</h1>
+            <p>Hỗ trợ học sinh THPT luyện tập & đánh giá năng lực</p>
+        </div>
+
+        <div class="login-card">
+            <h2>🔐 Đăng nhập hệ thống</h2>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ 'alert-error' if category == 'error' else 'alert-success' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <div class="form-group">
+                    <label>👤 Tên đăng nhập</label>
+                    <input type="text" name="username" placeholder="Nhập tên đăng nhập..." required>
+                </div>
+
+                <div class="form-group">
+                    <label>🔑 Mật khẩu</label>
+                    <input type="password" name="password" placeholder="Nhập mật khẩu..." required>
+                </div>
+
+                <button type="submit" class="btn-login">🚀 Đăng nhập</button>
+            </form>
+        </div>
+
+        <div class="login-footer">
+            Chưa có tài khoản?
+            <a href="{{ url_for('auth.register') }}">Đăng ký ngay</a>
+        </div>
+
+        <div class="copyright">
+            © 2026 – Hệ thống hỗ trợ ôn tập Tin học | Nhóm 1
+        </div>
+
+    </div>
+</div>
+
+<!-- ================= CSS Ở DƯỚI ================= -->
+<style>
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+/* BACKGROUND */
+.login-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* CONTAINER */
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    color: #fff;
+}
+
+/* HEADER */
+.login-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.login-header p {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 5px;
+}
+
+/* CARD */
+.login-card {
+    background: #ffffff;
+    color: #333;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+.login-card h2 {
+    text-align: center;
+    color: #0d6efd;
+    margin-bottom: 20px;
+}
+
+/* FORM */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13,110,253,0.2);
+}
+
+/* BUTTON */
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background: #0d6efd;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-login:hover {
+    background: #0b5ed7;
+}
+
+/* ALERT */
+.alert {
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #842029;
+}
+
+/* FOOTER */
+.login-footer {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.login-footer a {
+    color: #ffd43b;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}
+
+/* COPYRIGHT */
+.copyright {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+    opacity: 0.85;
+}
+</style>
+
+{% endblock %}

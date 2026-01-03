@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <!-- Thẻ Thông tin cá nhân -->
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white py-3 text-center">
+                    <h4 class="mb-0 fw-bold"><i class="fas fa-id-card me-2"></i>HỒ SƠ CÁ NHÂN</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Tên đăng nhập:</div>
+                        <div class="col-sm-8 fs-5 text-primary">{{ user.Username }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Khối lớp:</div>
+                        <div class="col-sm-8">
+                            <span class="badge bg-info text-dark fs-6">Lớp {{ user.Grade }}</span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Vai trò:</div>
+                        <div class="col-sm-8">
+                            <span class="badge bg-secondary">{{ user.Role }}</span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Ngày tham gia:</div>
+                        <div class="col-sm-8">{{ user.CreatedAt }}</div>
+                    </div>
+
+                    <hr>
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger px-4 fw-bold">
+                            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    }
+    .card-header {
+        background: linear-gradient(45deg, #0d6efd, #0a58ca) !important;
+    }
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+</style>
+{% endblock %}

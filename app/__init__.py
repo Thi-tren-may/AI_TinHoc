@@ -14,7 +14,13 @@ def create_app():
 
     # 2. Cấu hình Database (Dùng đường dẫn tuyệt đối như đã fix)
     basedir = os.path.abspath(os.path.dirname(__file__))
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, '../database/app.db')
+    #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, '../database/app.db')
+   # Tạo thư mục database nếu chưa tồn tại
+    db_folder = os.path.join(basedir, '../database')
+    if not os.path.exists(db_folder):
+        os.makedirs(db_folder)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(db_folder, 'app.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'nhom1-bi-mat'
 
@@ -26,10 +32,6 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix='/admin')  # Truy cập qua: /admin/dashboard
     app.register_blueprint(test_bp, url_prefix='/quiz')    # Truy cập qua: /quiz/quiz
     app.register_blueprint(report_bp, url_prefix='/report')# Truy cập qua: /report/view
-
     # Trang chủ mặc định
-    @app.route('/')
-    def index():
-        return "<h1>Chào mừng đến với Hệ thống Ôn tập - Nhóm 1</h1><a href='/auth/login'>Đến trang Đăng nhập</a>"
 
     return app
