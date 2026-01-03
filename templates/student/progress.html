@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiến Độ Học Tập - Nhóm 1</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/progress.css') }}">
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold text-primary">Tiến độ học tập 🚀</h2>
+        <p class="text-muted small">AI phân tích dựa trên dữ liệu làm bài của bạn.</p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 p-3 h-100">
+                <h6 class="fw-bold"><i class="fa-solid fa-chart-line me-2 text-primary"></i>Biểu đồ điểm số</h6>
+                <div class="chart-container" style="position: relative; height:300px;">
+                    <canvas id="scoreChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="d-flex flex-column gap-2 h-100">
+                <div class="p-3 bg-primary bg-opacity-10 border-start border-primary border-4 rounded-3">
+                    <small class="text-primary fw-bold">PHONG ĐỘ</small>
+                    <p class="mb-0 small text-dark text-break">{{ report.trend }}</p>
+                </div>
+                <div class="p-3 bg-warning bg-opacity-10 border-start border-warning border-4 rounded-3">
+                    <small class="text-warning fw-bold">LỖ HỔNG</small>
+                    <p class="mb-0 small text-dark text-break">{{ report.gaps }}</p>
+                </div>
+                <div class="p-3 bg-success bg-opacity-10 border-start border-success border-4 rounded-3">
+                    <small class="text-success fw-bold">TƯ DUY</small>
+                    <p class="mb-0 small text-dark text-break">{{ report.cognitive }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card border-0 bg-primary text-white p-3 rounded-4 shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="fs-1 me-3">🎯</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Gợi ý hành động tiếp theo:</h6>
+                        <p class="mb-0 small opacity-75">
+                            {% if "Tuyệt vời" in report.gaps %}
+                                Bạn đang giữ phong độ cực tốt! Hãy thử thách bản thân với đề thi nâng cao nhé.
+                            {% else %}
+                                AI gợi ý bạn nên dành thêm 15 phút ôn lại phần: <b>{{ report.gaps }}</b>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4 p-3">
+                <h6 class="fw-bold mb-3">📋 Lịch sử 10 bài gần nhất</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light text-secondary">
+                            <tr>
+                                <th>Ngày làm bài</th>
+                                <th>Điểm số</th>
+                                <th>Đánh giá</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in exams %}
+                            <tr>
+                                <td class="small text-muted">{{ exam.CreatedAt[:10] }}</td>
+                                <td class="fw-bold text-primary">{{ exam.TotalScore }}/10</td>
+                                <td>
+                                    {% if exam.TotalScore >= 8 %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Tốt</span>
+                                    {% elif exam.TotalScore >= 5 %}
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Đạt</span>
+                                    {% else %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Cần cố gắng</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 p-3 bg-white rounded-3 text-center border shadow-sm">
+        <p class="text-muted mb-0 small">
+            <i class="fa-solid fa-robot me-1"></i> <b>Cơ chế AI:</b> Hệ thống kết hợp phân tích SQL Lớp 2 và sức mạnh của Google Gemini để đưa ra lời khuyên cá nhân hóa.
+        </p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Lấy danh sách điểm
+    const SERVER_SCORE_LIST = {{ score_list | tojson }};
+    
+    // Lấy danh sách ngày làm bài (lấy từ biến exams đã có sẵn trong route)
+    // Chúng ta cũng đảo ngược [::-1] giống score_list để khớp thứ tự
+    const SERVER_DATE_LIST = [
+        {% for exam in exams|reverse %}
+            "{{ exam.CreatedAt[:10] }}",
+        {% endfor %}
+    ];
+</script>
+<script src="{{ url_for('static', filename='js/progress_chart.js') }}"></script>
+
+</body>
+</html>
