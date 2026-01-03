@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+body { 
+    font-family: 'Inter', sans-serif; 
+}
+/* Tối ưu cho mobile và laptop */
+body { background-color: #f4f7f6; }
+.card { transition: 0.2s; }
+.card:hover { transform: scale(1.01); }
+
+/* Chỉnh bảng cho gọn */
+.table th { font-size: 0.8rem; text-transform: uppercase; color: #6c757d; }
+.table td { font-size: 0.9rem; vertical-align: middle; }
+
+/* Font cho AI box */
+small { letter-spacing: 0.5px; }
