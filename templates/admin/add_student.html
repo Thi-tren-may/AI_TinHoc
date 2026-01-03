@@ -1,0 +1,106 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="container-fluid animate-fade-in px-4">
+    <div class="card card-pro border-0 shadow-lg mt-4">
+        
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold text-uppercase fs-6">
+                <i class="fas fa-user-plus me-2"></i> THÊM HỌC SINH MỚI
+            </h5>
+            <a href="{{ url_for('admin.manage_students') }}" class="btn btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i> Quay lại
+            </a>
+        </div>
+        
+        <div class="card-body p-4">
+            <form method="post">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-primary">
+                            <i class="fas fa-user-circle me-1"></i> TÊN ĐĂNG NHẬP
+                        </label>
+                        <input type="text" name="username" class="form-control bg-light py-2" placeholder="Ví dụ: hs_nguyenvan_a" required>
+                        <div class="form-text text-muted fst-italic small">
+                            <i class="fas fa-info-circle"></i> Tên đăng nhập là duy nhất.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-primary">
+                            <i class="fas fa-key me-1"></i> MẬT KHẨU
+                        </label>
+                        
+                        <div class="input-group">
+                            <input type="password" name="password" id="passwordInput" class="form-control bg-light py-2 border-end-0" placeholder="Nhập mật khẩu..." required>
+                            
+                            <button class="btn btn-light border border-start-0 text-muted" type="button" onclick="togglePassword()" style="background-color: #f8f9fa;">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-primary">
+                            <i class="fas fa-graduation-cap me-1"></i> KHỐI LỚP
+                        </label>
+                        <select name="grade" class="form-select bg-light py-2 fw-bold text-dark">
+                            <option value="10">🟦 Khối 10</option>
+                            <option value="11">🟨 Khối 11</option>
+                            <option value="12">🟩 Khối 12</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="my-4 text-muted opacity-25">
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success fw-bold py-2 px-5 shadow">
+                        <i class="fas fa-save me-2"></i> LƯU HỌC SINH
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('passwordInput');
+        const icon = document.getElementById('toggleIcon');
+        
+        if (passwordInput.type === 'password') {
+            // Hiện mật khẩu
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash'); // Đổi icon thành mắt gạch chéo
+        } else {
+            // Ẩn mật khẩu
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye'); // Đổi lại icon mắt thường
+        }
+    }
+</script>
+
+<style>
+    /* Chỉnh style để ô nhập và nút bấm liền mạch nhau */
+    .form-control:focus {
+        background-color: #fff !important;
+        border-color: #198754;
+        box-shadow: none; /* Tắt bóng mặc định để xử lý riêng */
+        z-index: 1;
+    }
+    /* Khi focus vào ô input thì viền cả nhóm sáng lên */
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+        border-radius: 0.375rem;
+    }
+    .input-group:focus-within .form-control, 
+    .input-group:focus-within .btn {
+        border-color: #198754;
+    }
+</style>
+{% endblock %}
