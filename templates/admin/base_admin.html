@@ -89,9 +89,6 @@
 
     /* --- 4. NÚT TOGGLE MENU (TỐI GIẢN) --- */
     .btn-toggle-menu {
-        position: absolute; /* Bay lên trên nội dung */
-        top: 15px;          /* Cách mép trên 15px */
-        left: 20px;         /* Cách mép trái 20px */
         background: transparent; /* Nền trong suốt */
         border: none;
         color: #adb5bd;     /* Màu xám nhạt tinh tế */
@@ -99,7 +96,7 @@
         cursor: pointer;
         padding: 5px;
         transition: all 0.2s;
-        z-index: 10;        /* Nổi lên trên cùng */
+        margin-right: 15px;
     }
     
     .btn-toggle-menu:hover {
@@ -172,6 +169,22 @@
         }
         .overlay.active { display: block; }
     }
+
+    /* --- 6. ADMIN TOPBAR --- */
+    .admin-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff;
+        padding: 10px 30px;
+        margin: -30px -30px 30px -30px; /* Negative margin to cover padding of content-area */
+        border-bottom: 1px solid #e3e6f0;
+        box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15);
+    }
+    
+    .user-admin-card {
+        transition: all 0.3s ease;
+    }
 </style>
 
 <div class="container-fluid p-0">
@@ -204,9 +217,38 @@
 
         <div class="content-area">
             
-            <button class="btn-toggle-menu" onclick="toggleMenu()" title="Ẩn/Hiện Menu">
-                <i class="fas fa-bars"></i>
-            </button>
+            <!-- TOPBAR -->
+            <div class="admin-topbar">
+                <button class="btn-toggle-menu" onclick="toggleMenu()" title="Ẩn/Hiện Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- ADMIN PROFILE -->
+                <div class="d-flex align-items-center user-admin-card">
+                    <div class="me-3 text-end lh-1 d-none d-sm-block">
+                        <small class="d-block text-muted text-uppercase" style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px;">Quản trị viên</small>
+                        <span class="fw-bold text-dark" style="font-size: 0.9rem;">
+                            {{ current_user.Username if current_user and current_user.is_authenticated else 'Admin' }}
+                        </span>
+                    </div>
+                    <div class="dropdown">
+                        <a class="btn btn-light rounded-circle p-0 shadow-sm dropdown-toggle" 
+                           href="#" 
+                           role="button" 
+                           id="adminDropdown"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false"
+                           style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0d6efd 0%, #00d4ff 100%); color: white; border: none;">
+                            <i class="fas fa-user-shield"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2" aria-labelledby="adminDropdown" style="border-radius: 12px; overflow: hidden;">
+                            <li><a class="dropdown-item py-2" href="{{ url_for('auth.profile') }}"><i class="fas fa-user-circle me-2 text-primary"></i> Hồ sơ cá nhân</a></li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><a class="dropdown-item py-2 text-danger fw-bold" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
             {% block admin_content %}{% endblock %}
             

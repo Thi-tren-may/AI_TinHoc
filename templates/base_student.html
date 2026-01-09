@@ -7,7 +7,7 @@
 {% block navbar %}
 <nav class="navbar navbar-expand-lg navbar-dark pro-navbar shadow-sm sticky-top">
     <div class="container">
-        <a class="navbar-brand fw-bolder fs-4 d-flex align-items-center" href="{{ url_for('home.index') }}">
+        <a class="navbar-brand fw-bolder fs-4 d-flex align-items-center" href="/">
             <i class="fas fa-book me-2 text-white"></i> <span style="text-shadow: 0 2px 4px rgba(0,0,0,0.2);">AI Tin Học</span>
         </a>
 
@@ -18,7 +18,7 @@
         <div class="collapse navbar-collapse" id="studentNav">
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                 <li class="nav-item px-1">
-                    <a class="nav-link nav-link-pro active d-flex align-items-center" href="{{ url_for('home.index') }}">
+                    <a class="nav-link nav-link-pro active d-flex align-items-center" href="{{ url_for('home.student_index') }}">
                         <i class="fas fa-home me-2"></i> Trang chủ
                     </a>
                 </li>
@@ -42,9 +42,28 @@
                     </span>
                 </div>
                 <div class="dropdown">
-                    <a class="btn btn-light rounded-circle p-0 avatar-glow" href="#" role="button" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: #f0fdf4;">
+                    <a class="btn btn-light rounded-circle p-0 avatar-glow dropdown-toggle" 
+                       href="#" 
+                       role="button" 
+                       id="userDropdown"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false"
+                       style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: #f0fdf4;">
                         <i class="fas fa-user text-primary"></i>
                     </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                                <i class="fas fa-user-circle me-2"></i> Hồ sơ
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

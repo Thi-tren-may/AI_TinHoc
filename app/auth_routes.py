@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import db, User
+from .  models import db, User
 import re
 
 auth_bp = Blueprint('auth', __name__)
@@ -11,7 +11,7 @@ auth_bp = Blueprint('auth', __name__)
 # ==========================
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
+    if request.method == 'POST': 
         username = request.form.get('username')
         password = request.form.get('password')
 
@@ -22,9 +22,10 @@ def login():
             flash('Đăng nhập thành công!', 'success')
 
             if user.Role == 'admin':
-                return redirect(url_for('admin.dashboard'))
+                return redirect(url_for('admin.manage_questions'))
             else:
-                return redirect(url_for('auth.profile'))
+                # ← SỬA DÒNG NÀY:  Chuyển đến trang student thay vì profile
+                return redirect(url_for('home.student_index'))
 
         flash('Tên đăng nhập hoặc mật khẩu không đúng.', 'error')
 
@@ -34,7 +35,7 @@ def login():
 # ==========================
 # REGISTER (STUDENT)
 # ==========================
-@auth_bp.route('/register', methods=['GET', 'POST'])
+@auth_bp. route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
@@ -43,7 +44,7 @@ def register():
 
         # Kiểm tra trống
         if not username or not password:
-            flash('Vui lòng nhập đầy đủ thông tin.', 'error')
+            flash('Vui lòng nhập đầy đủ thông tin. ', 'error')
             return redirect(url_for('auth.register'))
 
         # Kiểm tra độ dài
@@ -52,7 +53,7 @@ def register():
             return redirect(url_for('auth.register'))
 
         # Kiểm tra chữ hoa
-        if not re.search(r'[A-Z]', password):
+        if not re. search(r'[A-Z]', password):
             flash('Mật khẩu phải chứa ít nhất 1 chữ cái viết hoa (A-Z).', 'error')
             return redirect(url_for('auth.register'))
 
@@ -63,7 +64,7 @@ def register():
 
         # Kiểm tra user tồn tại
         existing_user = User.query.filter_by(Username=username).first()
-        if existing_user:
+        if existing_user: 
             flash('Tên đăng nhập đã tồn tại.', 'error')
             return redirect(url_for('auth.register'))
 
@@ -75,10 +76,10 @@ def register():
             Grade=int(grade) if grade else 10
         )
 
-        db.session.add(new_user)
+        db.session. add(new_user)
         db.session.commit()
 
-        flash('Đăng ký thành công! Vui lòng đăng nhập.', 'success')
+        flash('Đăng ký thành công! Vui lòng đăng nhập. ', 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('register.html')
@@ -101,9 +102,5 @@ def logout():
 @auth_bp.route('/profile')
 @login_required
 def profile():
-    if current_user.Role != 'student':
-        flash('Bạn không có quyền truy cập trang này.', 'error')
-        return redirect(url_for('auth.login'))
-
-    # chỉ render thông tin user
-    return render_template('profile.html')
+    # ← SỬA:  Thêm user=current_user để tránh lỗi 'user' is undefined
+    return render_template('profile.html', user=current_user)

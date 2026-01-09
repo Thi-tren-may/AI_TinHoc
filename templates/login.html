@@ -23,7 +23,7 @@
                 {% endif %}
             {% endwith %}
 
-            <form method="POST" action="{{ url_for('auth.login') }}">
+            <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm">
                 <div class="form-group">
                     <label>👤 Tên đăng nhập</label>
                     <input type="text" name="username" placeholder="Nhập tên đăng nhập..." required>
@@ -54,9 +54,9 @@
 <style>
 /* RESET */
 * {
-    margin: 0;
+    margin:  0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing:  border-box;
     font-family: "Segoe UI", Tahoma, sans-serif;
 }
 
@@ -99,13 +99,13 @@
     color: #333;
     border-radius: 14px;
     padding: 25px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    box-shadow:  0 20px 40px rgba(0,0,0,0.25);
 }
 
 .login-card h2 {
     text-align: center;
     color: #0d6efd;
-    margin-bottom: 20px;
+    margin-bottom:  20px;
 }
 
 /* FORM */
@@ -114,8 +114,8 @@
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 6px;
+    display:  block;
+    margin-bottom:  6px;
     font-weight: 600;
 }
 
@@ -176,13 +176,13 @@
 }
 
 .login-footer a {
-    color: #ffd43b;
+    color:  #ffd43b;
     font-weight: 600;
     text-decoration: none;
 }
 
 .login-footer a:hover {
-    text-decoration: underline;
+    text-decoration:  underline;
 }
 
 /* COPYRIGHT */
@@ -193,5 +193,8 @@
     opacity: 0.85;
 }
 </style>
+
+<!-- JAVASCRIPT:  Kiểm tra nếu đăng nhập th��nh công thì chuyển hướng -->
+
 
 {% endblock %}

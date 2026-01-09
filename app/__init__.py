@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+from flask_login import LoginManager
 from .models import db
 
 # 1. Import các Blueprint
@@ -9,6 +10,9 @@ from .admin_routes import admin_bp
 from .test_routes import test_bp
 from .report_routes import report_bp
 from .home_routes import home_bp  # Import blueprint trang chủ của S4
+
+# Khởi tạo LoginManager
+login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__, template_folder='../templates', static_folder='../static')
@@ -27,13 +31,24 @@ def create_app():
 
     db.init_app(app)
 
+    # Cấu hình Flask-Login
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Vui lòng đăng nhập để tiếp tục.'
+    login_manager.login_message_category = 'warning'
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        from .models import User  
+        return User.query.get(int(user_id))
+
     # 3. ĐĂNG KÝ BLUEPRINT
     
     # Blueprint của AI và Auth
     app.register_blueprint(ai_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     
-    # Blueprint Admin (Cập nhật theo develop: Bỏ prefix ở đây)
+    # Blueprint Admin (Cập nhật theo develop:  Bỏ prefix ở đây)
     app.register_blueprint(admin_bp)
     
     # Blueprint của Test và Report
