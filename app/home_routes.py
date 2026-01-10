@@ -1,13 +1,20 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
-# Xóa dòng import current_user nếu chưa làm login, để tránh lỗi
-# from flask_login import current_user 
 from flask_login import login_required, current_user
 
 home_bp = Blueprint('home', __name__)
 
+# --- BỔ SUNG ĐOẠN NÀY ĐỂ HẾT LỖI 404 ---
+@home_bp.route('/')
+def index():
+    # Nếu học sinh đã đăng nhập rồi, tự động chuyển vào dashboard
+    if current_user.is_authenticated:
+        return redirect(url_for('home.student_index'))
+    
+    # Nếu chưa đăng nhập, trả về trang giới thiệu chung index.html
+    # (File này nằm trực tiếp trong thư mục templates/)
+    return render_template('index.html')
 
-
-# 3. TRANG STUDENT - THÊM MỚI
+# --- TRANG STUDENT CỦA BẠN (GIỮ NGUYÊN) ---
 @home_bp.route('/student')
 @login_required
 def student_index():

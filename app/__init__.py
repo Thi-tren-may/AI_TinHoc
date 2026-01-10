@@ -4,7 +4,7 @@ from flask_login import LoginManager
 from .models import db
 
 # 1. Import các Blueprint
-from .ai_logic import ai_bp
+from .ai_routes import ai_bp  # CHỈ import từ ai_routes
 from .auth_routes import auth_bp
 from .admin_routes import admin_bp
 from .test_routes import test_bp
@@ -45,7 +45,8 @@ def create_app():
     # 3. ĐĂNG KÝ BLUEPRINT
     
     # Blueprint của AI và Auth
-    app.register_blueprint(ai_bp)
+    # Tìm đến dòng này và sửa lại thành:
+    app.register_blueprint(ai_bp, url_prefix='/ai')
     app.register_blueprint(auth_bp, url_prefix='/auth')
     
     # Blueprint Admin (Cập nhật theo develop:  Bỏ prefix ở đây)
