@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz_pro.css') }}">
+
+<div class="container-fluid bg-light min-vh-100 pb-5">
+    <form action="{{ url_for('test.submit_test') }}" method="POST" id="quizForm">
+        
+        <div class="fixed-top bg-white py-3 border-bottom" style="z-index: 1030;">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="m-0 fw-bold text-primary">Đề ôn tập</h5>
+                        <small class="text-muted">Thí sinh: <span class="fw-bold">Học sinh</span></small>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="timer-box">
+                            <i class="fas fa-clock"></i> <span id="timer" class="fw-bold">20:00</span>
+                        </div>
+                        <button type="button" class="btn btn-primary px-4 fw-bold shadow-sm" onclick="confirmSubmit()">
+                            <i class="fas fa-paper-plane me-1"></i> NỘP BÀI
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 100px;"></div>
+
+        <div class="container mt-3">
+            <div class="row">
+                <div class="col-md-9">
+                    {% for q in questions %}
+                    <div class="card mb-4 shadow-sm border-0 question-card" id="quest-{{ q['Id'] }}">
+                        <div class="card-body p-4">
+                            <h4 class="fw-bold mb-3 text-dark">Câu {{ loop.index }}:</h4>
+                            <p class="mb-3 fw-bold" style="font-size: 1.15rem;">{{ q['Content'] }}</p>
+                            
+                            <div class="options-text ms-2">
+                                <p class="mb-2"><strong>A.</strong> {{ q['OptionA'] }}</p>
+                                <p class="mb-2"><strong>B.</strong> {{ q['OptionB'] }}</p>
+                                <p class="mb-2"><strong>C.</strong> {{ q['OptionC'] }}</p>
+                                <p class="mb-2"><strong>D.</strong> {{ q['OptionD'] }}</p>
+                            </div>
+
+                            <div class="d-none">
+                                <input type="radio" name="{{ q['Id'] }}" value="A" id="radio-{{ q['Id'] }}-A">
+                                <input type="radio" name="{{ q['Id'] }}" value="B" id="radio-{{ q['Id'] }}-B">
+                                <input type="radio" name="{{ q['Id'] }}" value="C" id="radio-{{ q['Id'] }}-C">
+                                <input type="radio" name="{{ q['Id'] }}" value="D" id="radio-{{ q['Id'] }}-D">
+                            </div>
+                        </div>
+
+                        <div class="card-footer quiz-footer text-white d-flex align-items-center p-3">
+                            <div class="d-flex align-items-center text-white">
+                                <span class="me-3 fw-bold small">CHỌN ĐÁP ÁN:</span>
+                                <div class="d-flex gap-3">
+                                    <button type="button" class="btn-circle" onclick="selectAnswer('{{ q['Id'] }}', 'A')">A</button>
+                                    <button type="button" class="btn-circle" onclick="selectAnswer('{{ q['Id'] }}', 'B')">B</button>
+                                    <button type="button" class="btn-circle" onclick="selectAnswer('{{ q['Id'] }}', 'C')">C</button>
+                                    <button type="button" class="btn-circle" onclick="selectAnswer('{{ q['Id'] }}', 'D')">D</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-3">
+                    <div class="sidebar-sticky bg-white p-3 rounded shadow-sm border">
+                        <h6 class="fw-bold text-uppercase mb-3 small text-muted border-bottom pb-2">Mục lục câu hỏi</h6>
+                        
+                        <div class="question-grid">
+                            {% for q in questions %}
+                            <a href="#quest-{{ q['Id'] }}" class="q-idx-btn" id="idx-{{ q['Id'] }}">
+                                {{ loop.index }}
+                            </a>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mt-4 small d-flex justify-content-between text-muted">
+                            <div><span class="badge bg-warning me-1">&nbsp;</span> Đã làm</div>
+                            <div><span class="badge border bg-light text-dark ms-2">&nbsp;</span> Chưa làm</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // 1. Hàm chọn đáp án
+    function selectAnswer(questionId, option) {
+        // Tích vào radio ẩn
+        const radio = document.getElementById(`radio-${questionId}-${option}`);
+        if(radio) radio.checked = true;
+
+        // Đổi màu nút A,B,C,D
+        const container = document.getElementById(`quest-${questionId}`);
+        const buttons = container.querySelectorAll('.btn-circle');
+        buttons.forEach(btn => btn.classList.remove('selected'));
+        
+        buttons.forEach(btn => {
+            if(btn.innerText.trim() === option) btn.classList.add('selected');
+        });
+
+        // Đổi màu ô số sidebar
+        const sidebarBtn = document.getElementById(`idx-${questionId}`);
+        if(sidebarBtn) sidebarBtn.classList.add('done');
+    }
+
+    // 2. Đồng hồ đếm ngược
+    let timeSeconds = 20 * 60; 
+    const timerDisplay = document.getElementById('timer');
+    
+    const countdown = setInterval(() => {
+        if(timeSeconds <= 0) {
+            clearInterval(countdown);
+            alert("Hết giờ làm bài!");
+            document.getElementById('quizForm').submit();
+            return;
+        }
+        timeSeconds--;
+        const m = Math.floor(timeSeconds / 60);
+        const s = timeSeconds % 60;
+        timerDisplay.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+        
+        // Cảnh báo khi sắp hết giờ (còn 5 phút)
+        if(timeSeconds < 300) {
+            timerDisplay.parentElement.style.backgroundColor = '#ffecec';
+            timerDisplay.parentElement.classList.add('shake'); // Cần thêm class rung lắc nếu muốn
+        }
+    }, 1000);
+
+    // 3. Xác nhận nộp bài
+    function confirmSubmit() {
+        const total = {{ questions|length }};
+        const done = document.querySelectorAll('.q-idx-btn.done').length;
+        if(confirm(`Bạn đã làm ${done}/${total} câu. Nộp bài ngay?`)) {
+            document.getElementById('quizForm').submit();
+        }
+    }
+</script>
+{% endblock %}
