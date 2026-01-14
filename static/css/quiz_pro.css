@@ -14,9 +14,14 @@
     gap: 8px;
 }
 
-.fixed-top {
+.quiz-header-bar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1030;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    background-color: white; /* Thêm nền trắng để không bị trong suốt */
+     
 }
 
 /* 2. Nút tròn chọn đáp án */
@@ -83,4 +88,50 @@
 .q-idx-btn.done {
     background-color: #ffcc00; /* Màu vàng gốc của bạn */
     color: white; border-color: #ffcc00;
+}
+
+/* --- GIAO DIỆN CHỌN CHỦ ĐỀ (SELECT TOPIC) --- */
+
+/* 1. Ẩn checkbox mặc định đi (để thay bằng giao diện thẻ đẹp) */
+.topic-check-input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* 2. Thẻ chủ đề cơ bản */
+.card-content {
+    background: white;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid #e5e7eb; /* Màu viền nhạt mặc định */
+}
+
+/* 3. Hiệu ứng khi di chuột vào thẻ */
+.topic-card:hover .card-content {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border-color: #6366f1; /* Viền chuyển màu tím khi hover */
+}
+
+/* 4. Trạng thái ĐÃ CHỌN (Active) - Được JS kích hoạt */
+.bg-primary-subtle {
+    background-color: #e0e7ff !important; /* Màu nền tím rất nhạt */
+    border-width: 2px !important; /* Viền dày hơn */
+}
+
+.topic-card:hover .bg-primary-subtle {
+    background-color: #c7d2fe !important; /* Đậm hơn chút khi hover vào thẻ đã chọn */
+}
+
+/* 5. Nút bấm Tạo đề (Đồng bộ nút trang chủ) */
+.hover-up {
+    transition: transform 0.2s;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: none;
+}
+.hover-up:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
 }

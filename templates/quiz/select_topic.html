@@ -1,0 +1,116 @@
+{% extends "base_student.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz_pro.css') }}">
+
+<div class="container pb-5" style="padding-top: 20px;">
+    
+    <div class="mb-4">
+        <h2 class="fw-bold text-primary mb-1">
+            Thiết lập đề thi <i class="fas fa-bullseye text-danger ms-2"></i>
+        </h2>
+        <p class="text-muted">
+            Chọn chủ đề bạn muốn ôn tập hôm nay. AI sẽ tạo đề riêng cho bạn.
+        </p>
+    </div>
+
+    <form action="{{ url_for('test.do_test') }}" method="POST" id="setupForm">
+        <div class="card border-0 shadow-sm rounded-4" style="background: #fff;">
+            <div class="card-body p-4">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light">
+                    <h5 class="fw-bold text-dark m-0">
+                        <i class="fas fa-layer-group me-2 text-warning"></i> Danh sách chủ đề
+                    </h5>
+                    
+                    <div class="form-check form-switch">
+                        <input class="form-check-input cursor-pointer" type="checkbox" id="selectAll">
+                        <label class="form-check-label user-select-none small text-muted fw-bold" for="selectAll">CHỌN TẤT CẢ</label>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    {% for topic in topics %}
+                    <div class="col-md-6 col-lg-4">
+                        <label class="topic-card h-100 cursor-pointer position-relative d-block">
+                            <input type="checkbox" name="topics" value="{{ topic.Id }}" class="topic-check-input">
+                            
+                            <div class="card-content p-3 rounded-3 border bg-light h-100 d-flex align-items-center transition-all">
+                                <div class="me-3 rounded-circle bg-white text-primary fw-bold border d-flex align-items-center justify-content-center shadow-sm" 
+                                     style="width: 40px; height: 40px; min-width: 40px;">
+                                    {{ loop.index }}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold mb-0 text-dark topic-name line-clamp-2" style="font-size: 0.95rem;">{{ topic.Name }}</h6>
+                                </div>
+                                <div class="check-icon text-primary ms-2 opacity-0 transition-all">
+                                    <i class="fas fa-check-circle fa-lg"></i>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-5 text-center">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm fw-bold hover-up border-0" 
+                            style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);">
+                        <i class="fas fa-play me-2"></i> BẮT ĐẦU THI
+                    </button>
+                    <div class="text-muted small mt-2">
+                        <i class="fas fa-info-circle me-1"></i> Hệ thống sẽ trộn ngẫu nhiên 20 câu hỏi từ các chủ đề đã chọn
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.topic-check-input');
+        const selectAll = document.getElementById('selectAll');
+
+        function updateCardVisual(checkbox) {
+            const cardContent = checkbox.nextElementSibling;
+            const checkIcon = cardContent.querySelector('.check-icon');
+            
+            if (checkbox.checked) {
+                cardContent.classList.remove('bg-light', 'border');
+                cardContent.classList.add('bg-white', 'border-primary', 'shadow-sm');
+                cardContent.style.borderColor = '#2563eb';
+                checkIcon.classList.remove('opacity-0');
+            } else {
+                cardContent.classList.add('bg-light', 'border');
+                cardContent.classList.remove('bg-white', 'border-primary', 'shadow-sm');
+                cardContent.style.borderColor = '#dee2e6';
+                checkIcon.classList.add('opacity-0');
+            }
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                updateCardVisual(cb);
+                if (selectAll) selectAll.checked = Array.from(checkboxes).every(c => c.checked);
+            });
+        });
+
+        if(selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                    updateCardVisual(cb);
+                });
+            });
+        }
+    });
+</script>
+
+<style>
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .transition-all { transition: all 0.2s ease-in-out; }
+    .hover-up:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+    .topic-check-input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+</style>
+{% endblock %}
