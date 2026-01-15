@@ -13,3 +13,4 @@ database/*.db
 # Thư mục build (nếu sau này bạn đóng gói ứng dụng)
 build/
 dist/
+import_data.py

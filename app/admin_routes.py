@@ -176,12 +176,16 @@ def edit_topic(id):
     large_topics = topic_service.get_large_topics()
     return render_template('admin/edit_topic.html', topic=topic, large_topics=large_topics)
 
-# 4. XÓA CHỦ ĐỀ
+# 4. XÓA CHỦ ĐỀ (Đã sửa logic thành Xóa mềm)
 @admin_bp.route('/topic/delete/<int:id>')
 def delete_topic(id):
+    # Gọi service (Lúc này service đã chạy lệnh UPDATE IsActive=0 rồi)
     success = topic_service.delete_topic(id)
+    
     if success:
-        flash('Đã xóa chủ đề!', 'success')
+        # 👇 SỬA CÂU THÔNG BÁO FLASH CHO ĐÚNG NGHIỆP VỤ
+        flash('Đã xóa chủ đề khỏi danh sách!', 'success')
     else:
-        flash('Không thể xóa! Chủ đề này đang chứa câu hỏi hoặc dữ liệu khác.', 'danger')
+        flash('Đã xảy ra lỗi hệ thống.', 'danger')
+        
     return redirect(url_for('admin.manage_topics'))
