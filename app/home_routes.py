@@ -16,6 +16,10 @@ def index():
 @home_bp.route('/student')
 @login_required
 def student_index():
+    # 👇 BẢO MẬT: Nếu là Admin thì đuổi về trang Admin, không cho xem trang Student
+    if current_user.Role != 'student':
+        return redirect(url_for('admin.dashboard'))
+
     # A. Tính TỔNG SỐ BÀI đã làm (Đếm trong Database)
     total_exams = Exam.query.filter_by(UserId=current_user.Id).count()
 

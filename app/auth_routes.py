@@ -1,8 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from .  models import db, User
-import re
+from .models import db, User
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -19,10 +18,9 @@ def login():
 
         if user and check_password_hash(user.PasswordHash, password):
             login_user(user)  # đăng nhập Flask-Login
-            flash('Đăng nhập thành công!', 'success')
 
             if user.Role == 'admin':
-                return redirect(url_for('admin.manage_questions'))
+                return redirect(url_for('admin.dashboard'))
             else:
                 # ← SỬA DÒNG NÀY:  Chuyển đến trang student thay vì profile
                 return redirect(url_for('home.student_index'))
@@ -35,7 +33,7 @@ def login():
 # ==========================
 # REGISTER (STUDENT)
 # ==========================
-@auth_bp. route('/register', methods=['GET', 'POST'])
+@auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
@@ -44,22 +42,7 @@ def register():
 
         # Kiểm tra trống
         if not username or not password:
-            flash('Vui lòng nhập đầy đủ thông tin. ', 'error')
-            return redirect(url_for('auth.register'))
-
-        # Kiểm tra độ dài
-        if len(password) < 6:
-            flash('Mật khẩu phải có ít nhất 6 ký tự.', 'error')
-            return redirect(url_for('auth.register'))
-
-        # Kiểm tra chữ hoa
-        if not re. search(r'[A-Z]', password):
-            flash('Mật khẩu phải chứa ít nhất 1 chữ cái viết hoa (A-Z).', 'error')
-            return redirect(url_for('auth.register'))
-
-        # Kiểm tra chữ số
-        if not re.search(r'\d', password):
-            flash('Mật khẩu phải chứa ít nhất 1 chữ số (0-9).', 'error')
+            flash('Vui lòng nhập đầy đủ thông tin.', 'error')
             return redirect(url_for('auth.register'))
 
         # Kiểm tra user tồn tại
@@ -76,10 +59,10 @@ def register():
             Grade=int(grade) if grade else 10
         )
 
-        db.session. add(new_user)
+        db.session.add(new_user)
         db.session.commit()
 
-        flash('Đăng ký thành công! Vui lòng đăng nhập. ', 'success')
+        flash('Đăng ký thành công! Vui lòng đăng nhập.', 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('register.html')
@@ -99,8 +82,34 @@ def logout():
 # ==========================
 # PROFILE (STUDENT) – chỉ hiển thị thông tin
 # ==========================
-@auth_bp.route('/profile')
+@auth_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
+    if request.method == 'POST':
+        grade = request.form.get('grade')
+        password = request.form.get('password')
+
+        # 👇 FIX 1: Lấy user trực tiếp từ DB để đảm bảo lưu đúng vào CSDL
+        user_to_update = User.query.get(current_user.Id)
+
+        # 2. Cập nhật khối lớp
+        if grade:
+            user_to_update.Grade = int(grade)
+
+        # 3. Cập nhật mật khẩu (nếu người dùng nhập)
+        if password:
+            # 👇 FIX 2: Đổi 'error' thành 'danger' để hiện màu đỏ đúng chuẩn Bootstrap
+            user_to_update.PasswordHash = generate_password_hash(password)
+            flash('Đã cập nhật mật khẩu mới.', 'success')
+
+        try:
+            db.session.commit()
+            flash('Cập nhật thông tin thành công!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Có lỗi xảy ra: {str(e)}', 'danger')
+        
+        return redirect(url_for('auth.profile'))
+
     # ← SỬA:  Thêm user=current_user để tránh lỗi 'user' is undefined
     return render_template('profile.html', user=current_user)

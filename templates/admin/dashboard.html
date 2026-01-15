@@ -1,0 +1,198 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Tổng quan quản trị{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid animate-fade-in px-4">
+
+    <!-- KHUNG CHÀO ADMIN (CÓ MÀU) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm stat-card bg-primary-gradient text-white">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <div>
+                            <h1 class="fw-bold mb-2">
+                                Xin chào, Quản trị viên! 👋
+                            </h1>
+                            <p class="lead opacity-75 mb-0">
+                                Bạn đang đăng nhập với quyền quản trị hệ thống ôn tập Tin học.
+                                Tại đây, bạn có thể quản lý người học, chủ đề và ngân hàng câu hỏi.
+                            </p>
+                        </div>
+                        <div class="text-end d-none d-md-block ms-auto">
+                            <br>
+                            <span id="currentDate" class="fw-bold fs-5"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- THỐNG KÊ -->
+    <div class="row g-4 mb-5">
+
+        <!-- Học sinh -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 stat-card bg-primary-gradient text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase opacity-75 mb-2">Tài khoản Học sinh</h6>
+                            <h2 class="display-4 fw-bold mb-0">{{ student_count }}</h2>
+                        </div>
+                        <div class="icon-circle bg-white text-primary">
+                            <i class="fas fa-user-graduate fa-2x"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin.manage_students') }}" class="stretched-link text-white text-decoration-none small mt-3 d-inline-block opacity-75">
+                        Quản lý học sinh <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chủ đề -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 stat-card bg-success-gradient text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase opacity-75 mb-2">Chủ đề ôn tập</h6>
+                            <h2 class="display-4 fw-bold mb-0">{{ topic_count }}</h2>
+                        </div>
+                        <div class="icon-circle bg-white text-success">
+                            <i class="fas fa-layer-group fa-2x"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin.manage_topics') }}" class="stretched-link text-white text-decoration-none small mt-3 d-inline-block opacity-75">
+                        Quản lý chủ đề <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu hỏi -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 stat-card bg-warning-gradient text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase opacity-75 mb-2">Ngân hàng câu hỏi</h6>
+                            <h2 class="display-4 fw-bold mb-0">{{ question_count }}</h2>
+                        </div>
+                        <div class="icon-circle bg-white text-warning">
+                            <i class="fas fa-question fa-2x"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin.manage_questions') }}" class="stretched-link text-white text-decoration-none small mt-3 d-inline-block opacity-75">
+                        Quản lý câu hỏi <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- GIỚI THIỆU HỆ THỐNG -->
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(to bottom right, #ffffff, #f8f9fa);">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                            <i class="fas fa-rocket text-primary fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark">Mục tiêu hệ thống</h5>
+                            <small class="text-muted text-uppercase fw-bold" style="letter-spacing: 1px;">Sứ mệnh & Tầm nhìn</small>
+                        </div>
+                    </div>
+                    
+                    <p class="text-dark opacity-75 mb-4">
+                        Xây dựng môi trường ôn tập thông minh, giúp học sinh làm chủ kiến thức Tin học theo định hướng Chương trình GDPT 2018.
+                    </p>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-database text-warning mt-1 me-3"></i>
+                            <div>
+                                <span class="fw-bold text-dark">Ngân hàng câu hỏi chuẩn hóa</span>
+                                <p class="mb-0 small text-muted">Quản lý, phân loại câu hỏi theo chủ đề và mức độ nhận thức.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-chart-line text-success mt-1 me-3"></i>
+                            <div>
+                                <span class="fw-bold text-dark">Phát triển năng lực</span>
+                                <p class="mb-0 small text-muted">Đánh giá năng lực học sinh qua biểu đồ và lộ trình cá nhân.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-sync-alt text-info mt-1 me-3"></i>
+                            <div>
+                                <span class="fw-bold text-dark">Cập nhật liên tục</span>
+                                <p class="mb-0 small text-muted">Bám sát thay đổi của Bộ GD&ĐT về cấu trúc đề thi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-book text-success me-2"></i>
+                        Nội dung ôn tập (Chương trình 2018)
+                    </h5>
+                    <p class="text-muted mb-2">Hệ thống quản lý các chủ đề cốt lõi sau:</p>
+                    <ul class="list-unstyled text-muted mb-0 small">
+                        {% set letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'] %}
+                        {% for topic in large_topics %}
+                        {% set label = letters[loop.index0] if loop.index0 < 7 else loop.index %}
+                        <li class="mb-1"><i class="fas fa-angle-right text-primary me-2"></i><strong>Chủ đề {{ label }}: {{ topic['Name'] }}</strong></li>
+                        {% else %}
+                        <li class="text-muted fst-italic">Chưa có chủ đề lớn nào được tạo.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').innerText =
+        new Date().toLocaleDateString('vi-VN', options);
+</script>
+
+<style>
+    .bg-primary-gradient { background: linear-gradient(135deg, #4e54c8, #8f94fb); }
+    .bg-success-gradient { background: linear-gradient(135deg, #11998e, #38ef7d); }
+    .bg-warning-gradient { background: linear-gradient(135deg, #f2994a, #f2c94c); }
+
+    .stat-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}

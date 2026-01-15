@@ -1,11 +1,41 @@
 # app/admin_routes.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_required, current_user
 # 👇 IMPORT QUAN TRỌNG: Gọi file service vào để dùng
 from app import question_service 
 from app import student_service   # 👇 CÁI MỚI (quản lý học sinh)
 from app import topic_service
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
+# =========================================================
+# 👇 BẢO MẬT: CHẶN KHÔNG CHO HỌC SINH VÀO ADMIN - THU
+# =========================================================
+@admin_bp.before_request
+@login_required
+def require_admin():
+    if current_user.Role != 'admin':
+        flash('CẢNH BÁO: Bạn không có quyền truy cập trang Quản trị!', 'danger')
+        return redirect(url_for('home.student_index'))
+
+# =========================================================
+# 👇 TRANG TỔNG QUAN (DASHBOARD)
+# =========================================================
+@admin_bp.route('/')
+@admin_bp.route('/dashboard')
+def dashboard():
+    # Lấy số lượng từ các service
+    student_count = len(student_service.get_all_students())
+    topic_count = len(topic_service.get_large_topics())
+    question_count = len(question_service.get_all_questions())
+    # Lấy danh sách chủ đề lớn để hiển thị động
+    large_topics = topic_service.get_large_topics()
+    
+    return render_template('admin/dashboard.html', 
+                           student_count=student_count,
+                           topic_count=topic_count,
+                           question_count=question_count,
+                           large_topics=large_topics)
+# =========================================================
 # 1. TRANG DANH SÁCH
 @admin_bp.route('/questions')
 def manage_questions():
@@ -92,10 +122,12 @@ def manage_students():
 @admin_bp.route('/student/add', methods=('GET', 'POST'))
 def add_student():
     if request.method == 'POST':
+        password = request.form['password']
+
         # Gọi service mới để thêm
         success = student_service.add_new_student(
             username=request.form['username'],
-            password=request.form['password'],
+            password=password,
             grade=request.form['grade']
         )
         
@@ -114,12 +146,14 @@ def edit_student(id):
     student = student_service.get_student_by_id(id)
     
     if request.method == 'POST':
+        password = request.form['password']
+
         # Gọi service mới để sửa
         student_service.update_student(
             user_id=id,
             username=request.form['username'],
             grade=request.form['grade'],
-            password=request.form['password']
+            password=password
         )
         flash('Cập nhật thông tin thành công!', 'success')
         return redirect(url_for('admin.manage_students'))
