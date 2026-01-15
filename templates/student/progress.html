@@ -73,17 +73,25 @@
                         <tbody>
                             {% for exam in exams %}
                             <tr>
-                                <td class="small text-muted">{{ exam.CreatedAt[:10] }}</td>
+                                <td class="small text-muted">
+    {{ exam.CreatedAt[:10] if exam.CreatedAt else '---' }}
+</td>
                                 <td class="fw-bold text-primary">{{ exam.TotalScore }}/10</td>
                                 <td>
-                                    {% if exam.TotalScore >= 8 %}
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Tốt</span>
-                                    {% elif exam.TotalScore >= 5 %}
-                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Đạt</span>
-                                    {% else %}
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Cần cố gắng</span>
-                                    {% endif %}
-                                </td>
+    {% if exam.TotalScore >= 8 %}
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
+            <i class="fas fa-medal me-1"></i> Tốt
+        </span>
+    {% elif exam.TotalScore >= 5 %}
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">
+            <i class="fas fa-check-circle me-1"></i> Đạt
+        </span>
+    {% else %}
+        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill">
+            <i class="fas fa-fist-raised me-1"></i> Cần cố gắng
+        </span>
+    {% endif %}
+</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -109,7 +117,7 @@
     // Chúng ta cũng đảo ngược [::-1] giống score_list để khớp thứ tự
     const SERVER_DATE_LIST = [
         {% for exam in exams|reverse %}
-            "{{ exam.CreatedAt[:10] }}",
+            "{{ (exam.CreatedAt[:10] if exam.CreatedAt else '---') }}",
         {% endfor %}
     ];
 </script>

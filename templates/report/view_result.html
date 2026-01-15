@@ -1,178 +1,57 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
-
-<div class="container mt-5">
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark"><i class="fas fa-history text-primary me-2"></i>Lịch sử làm bài</h2>
+        <a href="{{ url_for('test.select_topic') }}" class="btn btn-primary rounded-pill shadow-sm">
+            <i class="fas fa-plus me-2"></i>Làm bài mới
+        </a>
+    </div>
     
-    {% if suggestion %}
-    <div class="alert alert-warning shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
-        <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
-        <div>
-            <h6 class="fw-bold mb-1">💡 Góc tư vấn học tập</h6>
-            <span>{{ suggestion }}</span>
-        </div>
-    </div>
-    {% endif %}
-
-    <div class="row mb-4">
-        <div class="col-md-4 text-center">
-            <div class="card shadow p-4 border-0 h-100">
-                <h3 class="text-muted mb-3">Tổng Điểm</h3>
-                <h1 class="display-1 fw-bold text-primary mb-2">{{ exam.TotalScore }}</h1>
-                
-                <div class="mb-4">
-                    {% if feedback %}
-                        <h5 class="{{ feedback.color }} fw-bold">
-                            <i class="{{ feedback.icon }} me-1"></i>
-                            {{ feedback.msg }}
-                        </h5>
-                    {% endif %}
-                </div>
-
-                <p class="text-secondary mt-auto">
-                    <i class="far fa-clock me-1"></i> Ngày làm bài: {{ exam.CreatedAt }}
-                </p>
-            </div>
-        </div>
-        
-        <div class="col-md-8">
-            <div class="row h-100">
-                <div class="col-md-7 mb-3 mb-md-0">
-                    <div class="card shadow p-3 border-0 h-100">
-                        <h5 class="mb-3 text-center">📊 Phân tích năng lực</h5>
-                        <canvas id="barChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="col-md-5">
-                    <div class="card shadow p-3 border-0 h-100">
-                        <h5 class="mb-3 text-center">🎯 Tỉ lệ Đúng/Sai</h5>
-                        <div style="height: 200px; display: flex; justify-content: center; align-items: center;">
-                            <canvas id="pieChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <h4 class="text-danger mb-3">⚠️ Cần xem lại ({{ wrong_answers|length }} câu)</h4>
-            
-            {% if wrong_answers %}
-                {% for item in wrong_answers %}
-                <div class="card wrong-card">
-                    <div class="card-body p-0">
+    <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light text-secondary">
+                    <tr>
+                        <th class="py-3 ps-4">Mã bài</th>
+                        <th class="py-3">Chủ đề</th>
+                        <th class="py-3 text-center">Điểm số</th>
+                        <th class="py-3">Ngày làm</th>
+                        <th class="py-3 text-end pe-4">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in results %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-muted">#{{ item.Exam.Id }}</td>
                         
-                        <div class="d-flex align-items-start mb-3">
-                            <div class="me-3">
-                                <span class="badge rounded-circle bg-danger p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                                    ?
-                                </span>
-                            </div>
-                            <div>
-                                <h5 class="question-title m-0">{{ item.question }}</h5>
-                            </div>
-                        </div>
-
-                        <div class="bg-light p-3 rounded-3 mb-3">
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="badge bg-white text-danger border border-danger">
-                                    <i class="fas fa-times me-1"></i> Bạn chọn: {{ item.selected }}
-                                </span>
-                                <span class="badge bg-white text-success border border-success">
-                                    <i class="fas fa-check me-1"></i> Đáp án đúng: {{ item.correct_opt }}
-                                </span>
-                                <span class="badge bg-white text-secondary border">
-                                    <i class="fas fa-layer-group me-1"></i> Mức độ: {{ item.difficulty }}
-                                </span>
-                            </div>
-                        </div>
+                        <td class="fw-bold text-primary">{{ item.TopicName }}</td>
                         
-                        <div class="text-end">
-                            <button class="btn btn-ai-pro shadow-sm">
-                                <i class="fas fa-robot me-2"></i> Giải thích chi tiết
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="alert alert-success text-center">
-                    Tuyệt vời! Bạn đã làm đúng hết tất cả các câu! 🎉
-                </div>
-            {% endif %}
+                        <td class="text-center">
+                            <span class="badge rounded-pill {{ 'bg-success' if item.Exam.TotalScore >= 8 else 'bg-warning' if item.Exam.TotalScore >= 5 else 'bg-danger' }}" style="min-width: 60px;">
+                                {{ item.Exam.TotalScore }}
+                            </span>
+                        </td>
+                        
+                        <td class="text-muted small">{{ item.Exam.CreatedAt }}</td>
+                        
+                        <td class="text-end pe-4">
+                            <a href="{{ url_for('report.view_result', exam_id=item.Exam.Id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                Xem lại <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            Bạn chưa làm bài thi nào. <a href="{{ url_for('test.select_topic') }}">Vào thi ngay!</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-<script>
-    // 1. Nhận dữ liệu từ Python (Lưu ý tên biến phải khớp với Python)
-    const barData = JSON.parse('{{ bar_data | tojson }}'); 
-    const pieData = JSON.parse('{{ pie_data | tojson }}'); // [Số câu đúng, Số câu sai]
-
-    // 2. Vẽ Biểu đồ Cột (Bar Chart)
-    const ctxBar = document.getElementById('barChart').getContext('2d');
-    new Chart(ctxBar, {
-        type: 'bar',
-        data: {
-            labels: ['Nhận biết', 'Thông hiểu', 'Vận dụng'],
-            datasets: [{
-                label: 'Tỷ lệ làm đúng (%)',
-                data: barData,
-                backgroundColor: [
-                    'rgba(245, 0, 61, 0.7)', // Tím
-                    'rgba(16, 185, 129, 0.7)', // Xanh ngọc
-                    'rgba(245, 158, 11, 0.7)'  // Cam
-                ],
-                borderRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: { y: { beginAtZero: true, max: 100 } },
-            plugins: { legend: { display: false } }
-        }
-    });
-
-    // 3. Vẽ Biểu đồ Tròn (Pie Chart) - MỚI
-    const ctxPie = document.getElementById('pieChart').getContext('2d');
-    new Chart(ctxPie, {
-        type: 'doughnut', // Dạng bánh Donut
-        data: {
-            labels: ['Đúng', 'Sai'],
-            datasets: [{
-                data: pieData,
-                backgroundColor: ['#10b981', '#ef4444'], // Xanh lá vs Đỏ
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' }
-            }
-        }
-    });
-
-    // 4. Hiệu ứng pháo hoa (Confetti)
-    const finalScore = parseFloat('{{ exam.TotalScore }}');
-    if (finalScore >= 8.0) {
-        setTimeout(() => {
-            confetti({
-                particleCount: 150, spread: 70, origin: { y: 0.6 },
-                colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
-            });
-            setTimeout(() => {
-                confetti({ particleCount: 100, angle: 60, spread: 55, origin: { x: 0 } });
-                confetti({ particleCount: 100, angle: 120, spread: 55, origin: { x: 1 } });
-            }, 500);
-        }, 500);
-    }
-</script>
 {% endblock %}

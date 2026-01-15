@@ -1,14 +1,16 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask_login import login_required, current_user # <--- IMPORT QUAN TRỌNG
 from app import db
 from sqlalchemy import text
+from datetime import datetime
 
 test_bp = Blueprint('test', __name__)
 
-# --- 1. TRANG CHỌN CHỦ ĐỀ (Giữ nguyên từ code mới của bạn) ---
+# --- 1. TRANG CHỌN CHỦ ĐỀ ---
 @test_bp.route('/chon-chu-de')
+@login_required  # <--- Bắt buộc đăng nhập
 def select_topic():
     try:
-        # Lấy các chủ đề lớn (ParentId IS NULL)
         sql = text("SELECT Id, Name FROM Topics WHERE ParentId IS NULL AND IsActive = 1")
         result = db.session.execute(sql).fetchall()
         
@@ -17,17 +19,10 @@ def select_topic():
     except Exception as e:
         return f"Lỗi lấy chủ đề: {str(e)}"
 
-# --- 2. TRANG LÀM BÀI (Hợp nhất: Thêm giả lập User & Check Login) ---
+# --- 2. TRANG LÀM BÀI ---
 @test_bp.route('/lam-bai-thi', methods=['GET', 'POST'])
+@login_required # <--- Bắt buộc đăng nhập
 def do_test():
-    # [TỪ CODE CŨ] Giả lập User ID để bạn test (nếu chưa có module Login)
-    if 'user_id' not in session:
-        session['user_id'] = 2  # ID giả định
-    
-    # Check login
-    if 'user_id' not in session:
-         return "Lỗi: Bạn chưa đăng nhập (Session trống)."
-
     if request.method == 'GET':
         return redirect(url_for('test.select_topic'))
     
@@ -39,7 +34,6 @@ def do_test():
                 sql = text("SELECT * FROM Exercises ORDER BY RANDOM() LIMIT 20")
                 result = db.session.execute(sql).fetchall()
             else:
-                # Logic lấy câu hỏi theo chủ đề Cha/Con (Giữ nguyên từ code mới)
                 placeholders = ','.join([f':id{i}' for i in range(len(selected_ids))])
                 query = f"""
                 SELECT e.* FROM Exercises e
@@ -50,7 +44,6 @@ def do_test():
                 params = {f'id{i}': topic_id for i, topic_id in enumerate(selected_ids)}
                 result = db.session.execute(text(query), params).fetchall()
 
-            # Map dữ liệu ra list
             questions = []
             for row in result:
                 questions.append({
@@ -60,7 +53,7 @@ def do_test():
                     'OptionC': row.OptionC, 'OptionD': row.OptionD
                 })
             
-            # [QUAN TRỌNG] Lưu đáp án đúng vào Session để chấm điểm sau này
+            # Lưu đáp án đúng vào Session
             correct_answers = {str(row.Id): row.CorrectOption for row in result}
             session['exam_answers'] = correct_answers
             
@@ -69,33 +62,28 @@ def do_test():
         except Exception as e:
             return f"Lỗi tạo đề thi: {str(e)}"
 
-# --- 3. NỘP BÀI & CHẤM ĐIỂM (Viết lại logic chấm tại đây vì S4 chưa xong) ---
+# --- 3. NỘP BÀI & CHẤM ĐIỂM (Đã sửa để dùng User thật) ---
 @test_bp.route('/nop-bai', methods=['POST'])
+@login_required # <--- Bắt buộc đăng nhập
 def submit_test():
-    # 1. Kiểm tra đăng nhập
-    if 'user_id' not in session:
-        return "Lỗi: Bạn chưa đăng nhập!"
-
-    # 2. Lấy đáp án chuẩn từ Session (đã lưu lúc tạo đề)
+    # 1. Kiểm tra session đề thi
     if 'exam_answers' not in session:
-        return "Lỗi: Không tìm thấy dữ liệu đề thi (Session expired). Hãy thử lại."
+        return "Lỗi: Phiên làm bài đã hết hạn. Hãy thử lại."
 
-    correct_answers = session['exam_answers'] # Dạng {'101': 'A', '102': 'B'}
-    user_answers = request.form.to_dict()     # Dạng {'101': 'A', '105': 'C'}
+    correct_answers = session['exam_answers']
+    user_answers = request.form.to_dict()
     
-    # 3. Tính điểm (Logic từ Code cũ nhưng viết gọn lại)
+    # 2. Tính điểm
     score = 0
     total_questions = len(correct_answers)
-    correct_count = 0
-    details = [] # Lưu chi tiết để insert vào DB
+    details = []
 
     for q_id, correct_opt in correct_answers.items():
-        user_opt = user_answers.get(q_id) # Lấy đáp án user chọn
+        user_opt = user_answers.get(q_id)
         is_correct = (user_opt == correct_opt)
         
         if is_correct:
-            score += (10 / total_questions) # Thang điểm 10
-            correct_count += 1
+            score += (10 / total_questions) if total_questions > 0 else 0
             
         details.append({
             'ExerciseId': q_id,
@@ -105,14 +93,20 @@ def submit_test():
     
     final_score = round(score, 2)
 
+    # 3. Lưu vào Database (QUAN TRỌNG: SỬA LẠI ĐOẠN NÀY)
     # 4. Lưu vào Database (Dùng SQLAlchemy của Code mới)
     try:
-        user_id = session['user_id']
+        user_id = current_user.Id
         
-        # A. Lưu bảng Exams
-        # Lưu ý: TopicId tạm để 1 hoặc lấy từ form nếu có (ở đây ta để mặc định 1 cho code chạy được)
-        sql_exam = text("INSERT INTO Exams (UserId, TopicId, TotalScore) VALUES (:u, :t, :s)")
-        result = db.session.execute(sql_exam, {'u': user_id, 't': 1, 's': final_score})
+        # 1. Lấy thời gian hiện tại
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
+        
+        # 2. [SỬA LỖI QUAN TRỌNG] Thêm cột CreatedAt vào câu lệnh INSERT
+        # :c là chỗ điền thời gian
+        sql_exam = text("INSERT INTO Exams (UserId, TopicId, TotalScore, CreatedAt) VALUES (:u, 1, :s, :c)")
+        
+        # 3. Truyền biến now_str vào tham số 'c'
+        result = db.session.execute(sql_exam, {'u': user_id, 's': final_score, 'c': now_str})
         db.session.commit()
         
         exam_id = result.lastrowid # Lấy ID bài thi vừa tạo
@@ -131,33 +125,9 @@ def submit_test():
             })
         db.session.commit()
 
+        # Chuyển hướng sang trang kết quả của S4
+        return redirect(url_for('report.view_result', exam_id=exam_id))
+
     except Exception as e:
         db.session.rollback()
         return f"Lỗi lưu điểm vào DB: {str(e)}"
-
-    # 5. TRẢ VỀ MÀN HÌNH KẾT QUẢ TẠM (VÌ S4 CHƯA LÀM XONG)
-    # Thay vì redirect, ta trả về HTML luôn để bạn xem điểm
-    return f"""
-    <div style="font-family: sans-serif; text-align: center; padding: 50px; background: #f8f9fa;">
-        <h1 style="color: #6366f1;">🎉 NỘP BÀI THÀNH CÔNG!</h1>
-        <div style="background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: inline-block;">
-            <h3>Điểm số của bạn:</h3>
-            <div style="font-size: 4rem; color: #ff4757; font-weight: bold;">{final_score}</div>
-            <p style="font-size: 1.2rem;">Số câu đúng: <b>{correct_count}</b> / {total_questions}</p>
-            <hr>
-            <p style="color: #666;">(Dữ liệu đã được lưu vào Database)</p>
-            <p style="color: #888; font-style: italic;">Giao diện xem chi tiết đang chờ S4 hoàn thiện...</p>
-            <br>
-            <a href="{ url_for('test.select_topic') }" 
-               style="text-decoration: none; background: #6366f1; color: white; padding: 12px 25px; border-radius: 50px; font-weight: bold;">
-               🔄 Làm đề khác
-            </a>
-            <a href="/" 
-               style="text-decoration: none; background: #e0e7ff; color: #6366f1; padding: 12px 25px; border-radius: 50px; font-weight: bold; margin-left: 10px;">
-               🏠 Về trang chủ
-            </a>
-        </div>
-    </div>
-    """
-    # sau khi S4 xong bạn có thể redirect về trang kết quả chi tiết như bình thường
-    #return redirect(url_for('report.view_result', exam_id=exam_id))

@@ -201,3 +201,67 @@
 .navbar-toggler:focus {
     box-shadow: none; /* Bỏ viền xanh mặc định khi bấm */
 }
+/* --- BUTTON AI PRO (GIA SƯ AI) --- */
+.btn-pro-ai {
+    /* Màu chuyển sắc (Gradient) từ Tím sang Xanh đậm */
+    background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+    border: none;
+    color: white !important;
+    padding: 10px 24px;
+    font-size: 1rem;
+    border-radius: 50px; /* Bo tròn viên thuốc */
+    box-shadow: 0 4px 15px rgba(0, 13, 255, 0.3); /* Đổ bóng mờ */
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hiệu ứng khi di chuột vào */
+.btn-pro-ai:hover {
+    transform: translateY(-3px); /* Nổi lên */
+    box-shadow: 0 8px 25px rgba(0, 13, 255, 0.5); /* Bóng đậm hơn */
+    background: linear-gradient(135deg, #5a63ff 0%, #000add 100%);
+    color: white;
+}
+
+/* Hiệu ứng khi đang bấm hoặc đang load */
+.btn-pro-ai:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Box hiển thị lời giải */
+.ai-response-box {
+    background-color: #f8f9fa;
+    border-left: 5px solid #0d6efd; /* Viền trái màu xanh */
+    border-radius: 8px;
+    transition: all 0.5s ease;
+}
+/* --- TRANG CHỦ HỌC SINH (DASHBOARD) --- */
+
+/* Hiệu ứng thẻ Card bay lên khi di chuột */
+.hover-card {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Màu nền nhẹ (Soft Backgrounds) */
+.bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+.bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+.bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+
+/* Hiệu ứng Icon phóng to nhẹ */
+.icon-box { transition: all 0.3s ease; }
+.hover-card:hover .icon-box { transform: scale(1.1); }
+
+/* Hiệu ứng nút bấm trắng ở Banner */
+.btn-light:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+}

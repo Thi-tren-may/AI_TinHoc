@@ -188,15 +188,18 @@ def get_ai_explanation(user_id, exercise_id, question, student_choice, correct_a
     try:
         model = genai.GenerativeModel(MODEL_NAME)
         # Prompt (Lời nhắc): Quyết định độ thông minh và giọng văn của AI
+        # Prompt (Lời nhắc) phiên bản "Siêu ngắn gọn"
         prompt = f"""
-        Bạn là chuyên gia giáo dục Tin học THPT Việt Nam. Hãy giải thích tại sao học sinh chọn sai:
-        - Câu hỏi: {question}
-        - Học sinh chọn phương án: {student_choice}
-        - Đáp án đúng phải là: {correct_answer}
-        Yêu cầu: 
-        1. Chỉ ra điểm nhầm lẫn trong tư duy của học sinh.
-        2. Giải thích ngắn gọn kiến thức trọng tâm (Dưới 100 từ).
-        3. Văn phong: Khích lệ, chuyên nghiệp.
+        Bạn là gia sư Tin học vui tính. Hãy giải thích CỰC NGẮN (tối đa 3 dòng) cho học sinh:
+        
+        - Câu hỏi: "{question}"
+        - Học sinh chọn sai: "{student_choice}"
+        - Đáp án đúng: "{correct_answer}"
+
+        Yêu cầu bắt buộc:
+        1. ❌ Tại sao câu học sinh chọn lại sai? (1 câu ngắn).
+        2. ✅ Tại sao đáp án kia mới đúng? (1 câu ngắn).
+        3. Dùng icon (💡, 🚫, ✅) đầu dòng cho dễ đọc. Không chào hỏi rườm rà.
         """
         
         response = model.generate_content(prompt)
