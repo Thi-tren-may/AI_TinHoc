@@ -5,22 +5,16 @@ from app.question_service import generate_exam_questions
 from datetime import datetime
 
 # --- THÊM 2 DÒNG NÀY ĐỂ FIX LỖI 403 BÊN S4 ---
-from flask_login import login_user
+from flask_login import login_user, current_user, login_required
 from app.models import User
 # ---------------------------------------------
 
 test_bp = Blueprint('test', __name__)
 
-# --- HÀM PHỤ TRỢ ---
-def ensure_test_user():
-    if 'user_id' not in session:
-        session['user_id'] = 2 
-        print("--- Đã giả lập User ID = 2 ---")
-
 # --- 1. TRANG CHỌN CHỦ ĐỀ ---
 @test_bp.route('/chon-chu-de')
+@login_required
 def select_topic():
-    ensure_test_user()
     try:
         sql = text("SELECT Id, Name FROM Topics WHERE ParentId IS NULL AND IsActive = 1")
         result = db.session.execute(sql).fetchall()
@@ -31,9 +25,8 @@ def select_topic():
 
 # --- 2. TRANG LÀM BÀI ---
 @test_bp.route('/lam-bai-thi', methods=['GET', 'POST'])
+@login_required
 def do_test():
-    ensure_test_user()
-
     if request.method == 'GET':
         return redirect(url_for('test.select_topic'))
     
@@ -60,9 +53,9 @@ def do_test():
 
 # --- 3. NỘP BÀI (XỬ LÝ 2 ĐƯỜNG DỮ LIỆU) ---
 @test_bp.route('/nop-bai', methods=['POST'])
+@login_required
 def submit_test():
-    ensure_test_user()
-    user_id = session['user_id']
+    user_id = current_user.Id
 
     if 'exam_answers' not in session:
         return "Lỗi Session: Mất dữ liệu đề thi."
@@ -104,12 +97,6 @@ def submit_test():
             db.session.execute(sql_detail, {'eid': exam_id, 'exid': d['ex_id'], 'opt': d['opt'], 'corr': d['corr']})
         db.session.commit()
 
-        # [FIX LỖI 403]: TỰ ĐỘNG ĐĂNG NHẬP CHO S4 CHẤP NHẬN
-        # Tìm user trong DB và login vào phiên làm việc thật
-        user_obj = User.query.get(user_id)
-        if user_obj:
-            login_user(user_obj) 
-
     except Exception as e:
         db.session.rollback()
         return f"Lỗi lưu điểm: {str(e)}"
@@ -122,9 +109,9 @@ def submit_test():
 
 # --- 4. TRANG LỊCH SỬ ---
 @test_bp.route('/lich-su')
+@login_required
 def history():
-    ensure_test_user()
-    user_id = session['user_id']
+    user_id = current_user.Id
     try:
         sql_exams = text("SELECT Id, TotalScore, CreatedAt FROM Exams WHERE UserId = :uid AND TotalScore IS NOT NULL ORDER BY Id DESC")
         exams_result = db.session.execute(sql_exams, {'uid': user_id}).fetchall()
@@ -177,8 +164,8 @@ def history():
 
 # --- 5. XEM CHI TIẾT ---
 @test_bp.route('/xem-lai-bai/<int:exam_id>')
+@login_required
 def review_exam(exam_id):
-    ensure_test_user()
     try:
         sql_exam = text("SELECT * FROM Exams WHERE Id = :eid")
         exam = db.session.execute(sql_exam, {'eid': exam_id}).fetchone()
@@ -207,8 +194,8 @@ def review_exam(exam_id):
 
 # --- 6. XÓA LỊCH SỬ ---
 @test_bp.route('/xoa-lich-su/<int:exam_id>', methods=['POST'])
+@login_required
 def delete_history(exam_id):
-    ensure_test_user()
     try:
         db.session.execute(text("DELETE FROM StudentResults WHERE ExamId = :eid"), {'eid': exam_id})
         db.session.execute(text("DELETE FROM Exams WHERE Id = :eid"), {'eid': exam_id})
