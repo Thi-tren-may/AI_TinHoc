@@ -60,6 +60,10 @@
                         <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger px-4 rounded-pill fw-bold btn-sm">
                             <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
                         </a>
+
+                        <button type="button" class="btn btn-outline-primary px-4 rounded-pill fw-bold btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="fas fa-edit me-2"></i>Chỉnh sửa
+                        </button>
                         
                         <button class="btn btn-primary px-4 rounded-pill fw-bold shadow-sm">
                             {% if user.Role == 'admin' %}
@@ -76,8 +80,49 @@
                 </div>
             </div>
             <div class="text-center mt-4">
-                <p class="text-muted small">ID người dùng: #{{ user.id or '001' }}</p>
+                <p class="text-muted small"></p>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CHỈNH SỬA THÔNG TIN -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-user-edit me-2"></i>Cập nhật hồ sơ</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('auth.profile') }}">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Tên đăng nhập</label>
+                        <input type="text" class="form-control bg-light" name="username" value="{{ user.Username }}" readonly>
+                        <div class="form-text text-muted">Tên đăng nhập không thể thay đổi.</div>
+                    </div>
+
+                    {% if user.Role != 'admin' %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Khối lớp</label>
+                        <select class="form-select" name="grade">
+                            <option value="10" {% if user.Grade == 10 %}selected{% endif %}>Khối 10</option>
+                            <option value="11" {% if user.Grade == 11 %}selected{% endif %}>Khối 11</option>
+                            <option value="12" {% if user.Grade == 12 %}selected{% endif %}>Khối 12</option>
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Đổi mật khẩu mới</label>
+                        <input type="password" class="form-control" name="password" placeholder="Để trống nếu không muốn đổi">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Lưu thay đổi</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

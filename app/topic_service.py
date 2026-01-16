@@ -14,6 +14,7 @@ def get_all_topics():
         SELECT t1.*, t2.Name as ParentName 
         FROM Topics t1
         LEFT JOIN Topics t2 ON t1.ParentId = t2.Id
+        WHERE t1.IsActive = 1
         ORDER BY t1.Level, t1.Id
     """
     topics = conn.execute(query).fetchall()
@@ -23,7 +24,7 @@ def get_all_topics():
 # 2. LẤY DANH SÁCH CHỦ ĐỀ LỚN (Để nạp vào menu thả xuống khi tạo chủ đề nhỏ)
 def get_large_topics():
     conn = get_db_connection()
-    topics = conn.execute("SELECT * FROM Topics WHERE Level = 'large'").fetchall()
+    topics = conn.execute("SELECT * FROM Topics WHERE Level = 'large' AND IsActive = 1").fetchall()
     conn.close()
     return topics
 
@@ -67,14 +68,15 @@ def update_topic(topic_id, name, level, parent_id=None):
 
 # 6. XÓA CHỦ ĐỀ
 def delete_topic(topic_id):
-    conn = get_db_connection()
-    # Kiểm tra xem có câu hỏi nào thuộc chủ đề này không trước khi xóa (tránh lỗi DB)
-    count = conn.execute("SELECT COUNT(*) FROM Exercises WHERE TopicId = ?", (topic_id,)).fetchone()[0]
-    if count > 0:
+    try:
+        conn = get_db_connection()
+        # Chuyển trạng thái IsActive về 0 (Ẩn đi)
+        # Không cần kiểm tra câu hỏi vì Ẩn đi thì không bị lỗi khóa ngoại
+        conn.execute("UPDATE Topics SET IsActive = 0 WHERE Id = ?", (topic_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Lỗi xóa mềm: {e}")
+        return False
+    finally:
         conn.close()
-        return False # Không cho xóa nếu đang có câu hỏi
-        
-    conn.execute("DELETE FROM Topics WHERE Id = ?", (topic_id,))
-    conn.commit()
-    conn.close()
-    return True

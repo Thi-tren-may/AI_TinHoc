@@ -1,0 +1,177 @@
+{% extends "base_student.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz_pro.css') }}">
+
+<div class="container pb-5" style="margin-top: 100px;">
+    
+    <!-- Tiêu đề -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary mb-1">Lịch sử bài làm</h2>
+            <p class="text-muted">Theo dõi quá trình tiến bộ của bạn qua từng bài thi.</p>
+        </div>
+        <a href="{{ url_for('test.select_topic') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm hover-up">
+            <i class="fas fa-plus me-2"></i> Làm đề mới
+        </a>
+    </div>
+
+    <!-- Bảng Lịch sử -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 history-table">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3">STT</th>
+                        <th class="py-3">Phạm vi ôn tập</th>
+                        <th class="py-3 text-center">Điểm số</th>
+                        <th class="py-3 text-center">Đánh giá</th>
+                        <th class="py-3">Ngày làm</th>
+                        <th class="py-3 text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if history_data %}
+                        {% for item in history_data %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-muted">#{{ loop.index }}</td>
+                            
+                            <!-- Cột Phạm vi -->
+                            <td>
+                                {% if item.topics %}
+                                    <!-- Nếu nhiều chủ đề -> Hiện nút mở Modal -->
+                                    <span class="fw-bold text-dark">{{ item.scope }}</span>
+                                    <button class="btn btn-sm btn-light text-primary border ms-2 rounded-pill px-3" 
+                                            onclick="showTopics('{{ item.id }}')" 
+                                            data-bs-toggle="tooltip" title="Xem danh sách chủ đề">
+                                        <i class="fas fa-list-ul small"></i> Chi tiết
+                                    </button>
+                                    
+                                    <!-- Dữ liệu ẩn để JS lấy hiển thị lên Modal -->
+                                    <div id="topics-{{ item.id }}" class="d-none">
+                                        <ul class="list-group list-group-flush">
+                                            {% for t in item.topics %}
+                                            <li class="list-group-item bg-transparent border-bottom-0 py-2">
+                                                <i class="fas fa-check-circle text-success me-2"></i> {{ t }}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <!-- Nếu 1 chủ đề -> Hiện luôn -->
+                                    <span class="text-dark">{{ item.scope }}</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Cột Điểm -->
+                            <td class="text-center">
+                                <span class="badge rounded-pill bg-light text-dark border px-3 py-2" style="font-size: 0.95rem;">
+                                    {{ item.score }}đ
+                                </span>
+                            </td>
+
+                            <!-- Cột Đánh giá -->
+                            <td class="text-center" >
+                                <!-- Badge hiển thị lời khuyên -->
+                                <span class="badge bg-{{ item.advice_class }}-subtle text-{{ item.advice_class }} border border-{{ item.advice_class }} px-2 py-1"
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-placement="top"
+                                    title="{{ 'Các chủ đề cần ôn: ' + ', '.join(item.weak_list) if item.weak_list else 'Làm bài rất tốt!' }}">
+                                    
+                                    <!-- Icon cảnh báo nếu yếu -->
+                                    {% if item.advice_class == 'danger' %}
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                    {% else %}
+                                        <i class="fas fa-check-circle me-1"></i>
+                                    {% endif %}
+                                    
+                                    {{ item.advice_text }}
+                                </span>
+                            </td>
+
+                            <!-- Cột Ngày -->
+                            <td class="text-muted small">
+                                <i class="far fa-calendar-alt me-1"></i> {{ item.date }}
+                            </td>
+
+                            <!-- Cột Thao tác (Đã thêm nút Xóa) -->
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    
+                                    <!-- Nút Xem chi tiết (Màu xanh) -->
+                                    <a href="{{ url_for('test.review_exam', exam_id=item.id) }}" 
+                                    class="btn btn-sm btn-outline-primary rounded-pill px-3" 
+                                    data-bs-toggle="tooltip" title="Xem lại bài làm">
+                                        <i class="fas fa-eye"></i> <span class="d-none d-md-inline">Xem</span>
+                                    </a>
+
+                                    <!-- Nút Xóa (Màu đỏ - Có hỏi xác nhận) -->
+                                    <form action="{{ url_for('test.delete_history', exam_id=item.id) }}" method="POST" 
+                                        onsubmit="return confirm('⚠️ CẢNH BÁO:\nBạn có chắc chắn muốn xóa bài thi này không?\nDữ liệu sẽ bị mất vĩnh viễn!');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" 
+                                                data-bs-toggle="tooltip" title="Xóa bài này">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fas fa-folder-open fa-3x mb-3 opacity-25"></i>
+                                <p>Bạn chưa làm bài thi nào.</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL HIỂN THỊ DANH SÁCH CHỦ ĐỀ -->
+<div class="modal fade" id="topicModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary">📚 Chủ đề đã ôn tập</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <div class="p-3 bg-light rounded-3 mt-2">
+                    <div id="modalTopicList">
+                        <!-- Nội dung sẽ được JS chèn vào đây -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JAVASCRIPT XỬ LÝ MODAL -->
+<script>
+    function showTopics(id) {
+        // 1. Lấy danh sách chủ đề từ thẻ ẩn
+        const content = document.getElementById('topics-' + id).innerHTML;
+        
+        // 2. Chèn vào Modal
+        document.getElementById('modalTopicList').innerHTML = content;
+        
+        // 3. Hiện Modal
+        const myModal = new bootstrap.Modal(document.getElementById('topicModal'));
+        myModal.show();
+    }
+    // Kích hoạt Tooltip của Bootstrap
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+</script>
+
+{% endblock %}

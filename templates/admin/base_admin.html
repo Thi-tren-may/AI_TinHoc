@@ -195,7 +195,8 @@
         <div class="sidebar" id="sidebar"> 
             <div class="sidebar-heading">Quản lý chung</div>
             
-            <a href="#" class="sidebar-link">
+            <a href="{{ url_for('admin.dashboard') }}" 
+               class="sidebar-link {{ 'active' if request.endpoint == 'admin.dashboard' }}">
                 <i class="fas fa-chart-pie"></i> Tổng quan
             </a>
             
@@ -254,12 +255,7 @@
             
             <footer class="admin-footer">
                 <div>
-                    <span>Copyright &copy; 2025 <b>AI TIN HỌC</b>. All rights reserved.</span>
-                </div>
-                <div>
-                    <span class="me-3">Phiên bản 1.0.0 (Beta)</span>
-                    <a href="#" class="text-decoration-none text-muted me-2">Điều khoản</a>
-                    <a href="#" class="text-decoration-none text-muted">Bảo mật</a>
+                    <span>Thiết kế bởi: Nhóm 1 - Hệ thống AI TIN HỌC - Hỗ trợ luyện thi THPT và đánh giá năng lực.</span>
                 </div>
             </footer>
         </div>

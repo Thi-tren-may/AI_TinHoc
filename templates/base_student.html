@@ -27,9 +27,15 @@
                         <i class="fas fa-pen-nib me-2"></i> Vào thi
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-pro {{ 'active' if request.endpoint == 'test.history' else '' }}" 
+                    href="{{ url_for('test.history') }}">
+                        <i class="fas fa-history me-1"></i> Lịch sử thi
+                    </a>
+                </li>
                 <li class="nav-item px-1">
                     <a class="nav-link nav-link-pro d-flex align-items-center" href="{{ url_for('ai.progress') }}">
-                        <i class="fas fa-history me-2"></i> Tiến độ học tập
+                        <i class="fas fa-chart-line me-1"></i> Tiến độ học tập
                     </a>
                 </li>
             </ul>

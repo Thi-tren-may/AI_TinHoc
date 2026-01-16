@@ -122,13 +122,50 @@ class LearningAnalytics:
         if hard < 0.4:
             return "Kỹ năng Vận dụng còn hạn chế. Hãy tập trung giải các bài toán thực tế."
         return "Khả năng tư duy các cấp độ của bạn rất đồng đều."
+    
+    # --- HÀM 4: GỌI GEMINI ĐỂ CHUỐT LỜI KHUYÊN (MỚI THÊM) ---
+    def get_ai_personalized_advice(self, gaps, trend, cognitive):
+        """
+        Dùng Gemini để viết lại báo cáo thô thành lời khuyên mượt mà.
+        """
+        try:
+            model = genai.GenerativeModel(MODEL_NAME)
+            prompt = f"""
+            Bạn là một giáo viên Tin học cực kỳ tâm lý và hay khích lệ học sinh. 
+            Dựa trên dữ liệu phân tích sau, hãy viết một lời khuyên ngắn (khoảng 2-3 câu) nhắm đến học sinh cần làm gì để cải thiện phần còn yếu:
+            
+            - Lỗ hổng kiến thức: {gaps}
+            - Xu hướng điểm số: {trend}
+            - Cấp độ tư duy: {cognitive}
 
+            Yêu cầu:
+            1. Giọng văn: Nghiêm túc, sử dụng các từ như "bạn".
+            2. Nội dung: Đừng chỉ liệt kê lỗi, hãy đưa ra một hành động cụ thể phối hợp với lỗ hổng kiến thức để tiến bộ .
+            3. Độ dài: Cực ngắn gọn để hiển thị vừa giao diện.
+            """
+            
+            response = model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            # Nếu AI lỗi, trả về dữ liệu thô ban đầu để không làm hỏng giao diện
+            return f"Dựa trên kết quả, bạn cần tập trung thêm vào {gaps}. Cố gắng lên nhé!"
+    #==============================================================   
+    # HÀM GỬI TOÀN BỘ DỮ LIỆU PHÂN TÍCH
     def generate_full_report(self, user_id):
-        """Hàm tổng hợp để API gọi 1 lần lấy được tất cả phân tích"""
+        # Sửa tên hàm gọi cho khớp với định nghĩa bên trên
+        raw_gaps = self.get_knowledge_gaps(user_id)
+        raw_trend = self.get_score_trend(user_id)          # Đã sửa từ get_learning_trend
+        raw_cognitive = self.get_cognitive_analysis(user_id) # Đã sửa từ get_cognitive_level
+
+        # Gọi Gemini để lấy lời khuyên mượt mà
+        # Đảm bảo bạn đã định nghĩa hàm get_ai_personalized_advice trong class này
+        ai_advice = self.get_ai_personalized_advice(raw_gaps, raw_trend, raw_cognitive)
+
         return {
-            "trend": self.get_score_trend(user_id),
-            "gaps": self.get_knowledge_gaps(user_id),
-            "cognitive": self.get_cognitive_analysis(user_id)
+            "trend": raw_trend,
+            "gaps": raw_gaps,
+            "cognitive": raw_cognitive,
+            "advice": ai_advice
         }
 
 # ===============================================================
@@ -226,3 +263,4 @@ def get_ai_explanation(user_id, exercise_id, question, student_choice, correct_a
     except Exception as e:
         # Lỗi này mới là lỗi nặng (mất mạng, hết tiền API...), lúc này mới báo AI bận
         return f"Đáp án đúng là: {correct_answer}. (Hiện tại AI đang bận, bạn vui lòng xem lại SGK nhé!)"
+    

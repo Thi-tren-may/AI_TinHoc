@@ -45,13 +45,9 @@
                 <div class="d-flex align-items-center">
                     <div class="fs-1 me-3">🎯</div>
                         <div>
-                            <h6 class="fw-bold mb-1">Gợi ý hành động tiếp theo:</h6>
-                            <p class="mb-0 small opacity-75">
-                            {% if "chưa tạo thành lỗ hổng" in report.gaps or "Tuyệt vời" in report.gaps %}
-                                Chúc mừng! Bạn đang giữ phong độ rất tốt. Hãy thử thách bản thân với các đề thi vận dụng cao nhé!
-                            {% else %}
-                                AI gợi ý bạn nên dành thêm 15 phút ôn tập lại kiến thức về: <b>{{ report.gaps }}</b>.
-                            {% endif %}
+                            <h6 class="fw-bold mb-1">💡 Lời khuyên cá nhân hóa từ AI:</h6>
+                            <p class="mb-0 small" style="font-style: italic;">
+                                {{ report.advice }}
                             </p>
                         </div>
                 </div>
