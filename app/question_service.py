@@ -1,6 +1,8 @@
 # app/question_service.py
-import sqlite3
-
+# import sqlite3
+from app import db                  # Để dùng db.session
+from sqlalchemy import text         # Để dùng câu lệnh SQL text()
+import random                       # Để dùng random.shuffle
 # 1. CẤU HÌNH KẾT NỐI DATABASE
 def get_db_connection():
     conn = sqlite3.connect('database/app.db')
@@ -63,44 +65,83 @@ def delete_question(question_id):
     conn.commit()
     conn.close()
 
-# 8. THUẬT TOÁN SINH ĐỀ (QUAN TRỌNG - S2 SẼ DÙNG HÀM NÀY)
-def generate_exam_questions(topic_id, total_questions=20):
-    conn = get_db_connection()
-    
-    # Cấu hình tỷ lệ: 40% Dễ (1), 30% Vừa (2), 30% Khó (3)
-    num_easy = int(total_questions * 0.4)   # 8 câu
-    num_medium = int(total_questions * 0.3) # 6 câu
-    num_hard = total_questions - num_easy - num_medium # 6 câu
+# 8. THUẬT TOÁN SINH ĐỀ NÂNG CẤP (Hỗ trợ nhiều chủ đề + Tỷ lệ vàng)
+def generate_exam_questions(selected_topic_ids, total_questions=20):
+    """
+    selected_topic_ids: Danh sách ID chủ đề (VD: ['1', '2'])
+    total_questions: Tổng số câu (Mặc định 20)
+    """
+    try:
+        # 1. Tính toán tỷ lệ
+        num_easy = int(total_questions * 0.4)   # 8 câu
+        num_medium = int(total_questions * 0.3) # 6 câu
+        num_hard = total_questions - num_easy - num_medium # 6 câu
 
-    # Hàm con lấy ngẫu nhiên
-    def get_questions_by_diff(diff, limit):
-        return conn.execute("""
-            SELECT * FROM Exercises 
-            WHERE TopicId = ? AND Difficulty = ? 
-            ORDER BY RANDOM() LIMIT ?
-        """, (topic_id, diff, limit)).fetchall()
-
-    exam_questions = []
-    exam_questions.extend(get_questions_by_diff(1, num_easy))
-    exam_questions.extend(get_questions_by_diff(2, num_medium))
-    exam_questions.extend(get_questions_by_diff(3, num_hard))
-
-    # Logic bù trừ nếu thiếu câu hỏi
-    current_count = len(exam_questions)
-    if current_count < total_questions:
-        missing = total_questions - current_count
-        ids_selected = tuple([q['Id'] for q in exam_questions])
-        
-        if not ids_selected:
-             more_questions = conn.execute("SELECT * FROM Exercises WHERE TopicId = ? ORDER BY RANDOM() LIMIT ?", (topic_id, missing)).fetchall()
+        # 2. Xử lý danh sách ID để đưa vào SQL
+        if not selected_topic_ids:
+            # Nếu không chọn gì -> Lấy tất cả
+            where_clause = "1=1" 
+            params = {}
         else:
-            # Tạo chuỗi placeholder ?,?,? cho SQL IN clause
-            placeholders = ','.join(['?'] * len(ids_selected))
-            query = f"SELECT * FROM Exercises WHERE TopicId = ? AND Id NOT IN ({placeholders}) ORDER BY RANDOM() LIMIT ?"
-            params = [topic_id] + list(ids_selected) + [missing]
-            more_questions = conn.execute(query, params).fetchall()
-            
-        exam_questions.extend(more_questions)
+            # Logic tìm cả cha lẫn con
+            placeholders = ','.join([f':id{i}' for i in range(len(selected_topic_ids))])
+            where_clause = f"""
+                (t.Id IN ({placeholders}) OR t.ParentId IN ({placeholders}))
+            """
+            params = {f'id{i}': topic_id for i, topic_id in enumerate(selected_topic_ids)}
 
-    conn.close()
-    return [dict(q) for q in exam_questions]
+        # 3. Hàm con lấy câu hỏi theo độ khó
+        def get_by_diff(difficulty, limit):
+            current_params = params.copy()
+            current_params['diff'] = difficulty
+            current_params['lim'] = limit
+            
+            sql = f"""
+                SELECT e.* FROM Exercises e
+                JOIN Topics t ON e.TopicId = t.Id
+                WHERE {where_clause} AND e.Difficulty = :diff
+                ORDER BY RANDOM() LIMIT :lim
+            """
+            result = db.session.execute(text(sql), current_params).fetchall()
+            return [dict(row._mapping) for row in result] # Chuyển về dạng Dictionary
+
+        # 4. Thực thi lấy câu hỏi
+        questions = []
+        questions.extend(get_by_diff(1, num_easy))      # Lấy câu Dễ
+        questions.extend(get_by_diff(2, num_medium))    # Lấy câu Vừa
+        questions.extend(get_by_diff(3, num_hard))      # Lấy câu Khó
+
+        # 5. Logic bù đắp (Anti-Crash): Nếu thiếu thì lấy bù ngẫu nhiên
+        current_count = len(questions)
+        if current_count < total_questions:
+            missing = total_questions - current_count
+            # Lấy thêm các câu chưa có trong danh sách (bất kể độ khó)
+            exclude_ids = [q['Id'] for q in questions]
+            
+            if exclude_ids:
+                exclude_placeholders = ','.join([f':ex{i}' for i in range(len(exclude_ids))])
+                exclude_sql = f"AND e.Id NOT IN ({exclude_placeholders})"
+                exclude_params = {f'ex{i}': eid for i, eid in enumerate(exclude_ids)}
+                params.update(exclude_params)
+            else:
+                exclude_sql = ""
+
+            params['lim'] = missing
+            
+            fill_sql = f"""
+                SELECT e.* FROM Exercises e
+                JOIN Topics t ON e.TopicId = t.Id
+                WHERE {where_clause} {exclude_sql}
+                ORDER BY RANDOM() LIMIT :lim
+            """
+            more_questions = db.session.execute(text(fill_sql), params).fetchall()
+            questions.extend([dict(row._mapping) for row in more_questions])
+
+        # 6. Trộn ngẫu nhiên lần cuối
+        random.shuffle(questions)
+        
+        return questions
+
+    except Exception as e:
+        print(f"Lỗi sinh đề: {e}")
+        return []

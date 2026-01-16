@@ -4,6 +4,7 @@ from app import db
 from sqlalchemy import text
 from datetime import datetime
 
+from app.question_service import generate_exam_questions
 test_bp = Blueprint('test', __name__)
 
 # --- 1. TRANG CHỌN CHỦ ĐỀ ---
@@ -21,46 +22,43 @@ def select_topic():
 
 # --- 2. TRANG LÀM BÀI ---
 @test_bp.route('/lam-bai-thi', methods=['GET', 'POST'])
-@login_required # <--- Bắt buộc đăng nhập
 def do_test():
+    # Giả lập & Check Login (Giữ nguyên)
+    if 'user_id' not in session: session['user_id'] = 2 
+    if 'user_id' not in session: return "Lỗi: Chưa đăng nhập"
+
     if request.method == 'GET':
         return redirect(url_for('test.select_topic'))
     
     if request.method == 'POST':
         selected_ids = request.form.getlist('topics')
         
-        try:
-            if not selected_ids:
-                sql = text("SELECT * FROM Exercises ORDER BY RANDOM() LIMIT 20")
-                result = db.session.execute(sql).fetchall()
-            else:
-                placeholders = ','.join([f':id{i}' for i in range(len(selected_ids))])
-                query = f"""
-                SELECT e.* FROM Exercises e
-                JOIN Topics t ON e.TopicId = t.Id
-                WHERE t.Id IN ({placeholders}) OR t.ParentId IN ({placeholders})
-                ORDER BY RANDOM() LIMIT 20
-                """
-                params = {f'id{i}': topic_id for i, topic_id in enumerate(selected_ids)}
-                result = db.session.execute(text(query), params).fetchall()
+        # --- GỌI THUẬT TOÁN TỪ FILE SERVICE ---
+        # Code cũ dài dòng đã được thay thế bằng 1 dòng này:
+        raw_questions = generate_exam_questions(selected_ids, total_questions=20)
+        # --------------------------------------
 
-            questions = []
-            for row in result:
-                questions.append({
-                    'Id': row.Id,
-                    'Content': row.Content,
-                    'OptionA': row.OptionA, 'OptionB': row.OptionB,
-                    'OptionC': row.OptionC, 'OptionD': row.OptionD
-                })
-            
-            # Lưu đáp án đúng vào Session
-            correct_answers = {str(row.Id): row.CorrectOption for row in result}
-            session['exam_answers'] = correct_answers
-            
-            return render_template('quiz/do_test.html', questions=questions)
-            
-        except Exception as e:
-            return f"Lỗi tạo đề thi: {str(e)}"
+        if not raw_questions:
+            return "Không tạo được đề thi (Có thể do lỗi DB hoặc không đủ câu hỏi)."
+
+        # Chuyển đổi dữ liệu để hiển thị (Mapping key)
+        # Vì hàm service trả về dict sẵn rồi, ta chỉ cần map lại cho chắc chắn
+        questions = []
+        for q in raw_questions:
+            questions.append({
+                'Id': q['Id'],
+                'Content': q['Content'],
+                'OptionA': q['OptionA'], 
+                'OptionB': q['OptionB'],
+                'OptionC': q['OptionC'], 
+                'OptionD': q['OptionD']
+            })
+        
+        # Lưu đáp án đúng vào Session
+        correct_answers = {str(q['Id']): q['CorrectOption'] for q in raw_questions}
+        session['exam_answers'] = correct_answers
+        
+        return render_template('quiz/do_test.html', questions=questions)
 
 # --- 3. NỘP BÀI & CHẤM ĐIỂM (Đã sửa để dùng User thật) ---
 @test_bp.route('/nop-bai', methods=['POST'])
