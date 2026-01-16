@@ -139,7 +139,7 @@ class LearningAnalytics:
             - Cấp độ tư duy: {cognitive}
 
             Yêu cầu:
-            1. Giọng văn: Nghiêm túc, sử dụng các từ như "Bạn".
+            1. Giọng văn: Nghiêm túc, sử dụng các từ như "bạn".
             2. Nội dung: Đừng chỉ liệt kê lỗi, hãy đưa ra một hành động cụ thể phối hợp với lỗ hổng kiến thức để tiến bộ .
             3. Độ dài: Cực ngắn gọn để hiển thị vừa giao diện.
             """
