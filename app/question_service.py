@@ -1,5 +1,5 @@
 # app/question_service.py
-# import sqlite3
+import sqlite3
 from app import db                  # Để dùng db.session
 from sqlalchemy import text         # Để dùng câu lệnh SQL text()
 import random                       # Để dùng random.shuffle
