@@ -135,3 +135,30 @@
     transform: translateY(-3px);
     box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
 }
+/* --- STYLE CHO TRANG LỊCH SỬ --- */
+.history-table thead th {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.history-table tbody td {
+    vertical-align: middle;
+    font-size: 0.95rem;
+}
+
+.history-table tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Màu nền nhạt cho các Badge đánh giá */
+.bg-success-subtle { background-color: #d1e7dd !important; color: #0f5132 !important; }
+    .bg-primary-subtle { background-color: #cfe2ff !important; color: #084298 !important; }
+    .bg-info-subtle { background-color: #cff4fc !important; color: #055160 !important; }
+    .bg-warning-subtle { background-color: #fff3cd !important; color: #664d03 !important; }
+    .bg-danger-subtle { background-color: #f8d7da !important; color: #842029 !important; }
+    
+    #historyTable th { font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    #historyTable td { font-size: 0.95rem; }
