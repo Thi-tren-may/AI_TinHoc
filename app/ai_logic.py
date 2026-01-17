@@ -29,31 +29,55 @@ class LearningAnalytics:
         conn.row_factory = sqlite3.Row
         return conn
 
-    # --- HÀM 1: PHÂN TÍCH PHONG ĐỘ (TREND) ---
+# --- HÀM 1: PHÂN TÍCH PHONG ĐỘ (TREND) - PHIÊN BẢN THÔNG MINH ---
     def get_score_trend(self, user_id):
         """
-        Logic: Lấy điểm bài mới nhất trừ bài kề trước.
-        Mở rộng: Có thể tính trung bình 3 bài gần nhất so với 3 bài trước đó để chính xác hơn.
+        Mục tiêu: So sánh bài mới nhất với trung bình các bài trước đó 
+        để biết học sinh đang tiến bộ, lùi bước hay 'dậm chân tại chỗ ở mức yếu'.
         """
         conn = self._get_connection()
         cursor = conn.cursor()
-        # Lấy điểm 5 bài gần nhất, bài mới nhất nằm ở đầu danh sách
-        cursor.execute("SELECT TotalScore FROM Exams WHERE UserId = ? ORDER BY CreatedAt DESC LIMIT 5", (user_id,))
+        
+        # Bước 1: Lấy điểm của 5 bài gần đây nhất (sắp xếp từ mới đến cũ)
+        cursor.execute("""
+            SELECT TotalScore FROM Exams 
+            WHERE UserId = ? 
+            ORDER BY CreatedAt DESC LIMIT 5
+        """, (user_id,))
         scores = [row['TotalScore'] for row in cursor.fetchall()]
         conn.close()
 
+        # Bước 2: Kiểm tra dữ liệu đầu vào
         if len(scores) < 2:
-            return "Cần làm tối thiểu 2 bài để phân tích xu hướng."
+            return "Cần làm tối thiểu 2 bài để AI bắt đầu phân tích xu hướng học tập."
 
-        latest = scores[0]    # Bài vừa làm xong
-        previous = scores[1]  # Bài làm trước đó
-        diff = latest - previous
+        # Bước 3: Phân tách dữ liệu
+        latest = scores[0]          # Bài vừa làm xong (mới nhất)
+        past_scores = scores[1:]    # Danh sách các bài làm trong quá khứ (từ bài thứ 2 đến 5)
+        
+        # Bước 4: Tính điểm trung bình của các bài cũ
+        avg_previous = sum(past_scores) / len(past_scores)
+        
+        # Bước 5: Tính toán sự chênh lệch (diff)
+        diff = latest - avg_previous
 
+        # --- BẮT ĐẦU LOGIC PHÂN TÍCH ---
+
+        # TRƯỜNG HỢP 1: Điểm không thay đổi nhiều nhưng lại nằm ở mức "nguy hiểm" (dưới 5 điểm)
+        # Giải quyết lỗ hổng "khen học sinh yếu ổn định"
+        if abs(diff) <= 1.0 and latest < 5.0:
+            return f"Cảnh báo: Điểm số của bạn đang dậm chân tại chỗ ở mức chưa đạt ({latest}đ). Bạn cần xem lại kỹ lý thuyết nhé!"
+
+        # TRƯỜNG HỢP 2: Điểm mới nhất cao hơn hẳn trung bình quá khứ (> 1 điểm)
         if diff > 1.0: 
-            return f"Xu hướng tăng mạnh (+{diff}đ). Bạn đang hấp thụ kiến thức rất tốt!"
+            return f"Xu hướng tăng tốt! Điểm bài mới ({latest}đ) đã vượt mức trung bình trước đây ({round(avg_previous, 1)}đ). Cố gắng phát huy nhé!"
+
+        # TRƯỜNG HỢP 3: Điểm mới nhất thấp hơn hẳn trung bình quá khứ (< -1 điểm)
         elif diff < -1.0:
-            return f"Xu hướng giảm ({diff}đ). Hãy kiểm tra lại các phần kiến thức mới học."
-        return "Phong độ ổn định. Hãy tiếp tục duy trì đà học tập này."
+            return f"Phong độ đang giảm sút! Bài này bạn làm thấp hơn mức trung bình thường ngày {abs(round(diff, 1))}đ. Đừng nản chí, hãy xem lại các câu sai!"
+
+        # TRƯỜNG HỢP 4: Điểm số ổn định ở mức Khá/Giỏi (biến thiên không quá 1 điểm và điểm >= 5)
+        return "Phong độ rất ổn định. Bạn đang duy trì nhịp độ học tập cực kỳ chắc chắn."
 
     # --- HÀM 2: TÌM LỖ HỔNG KIẾN THỨC (GAP DETECTION) ---
     def get_knowledge_gaps(self, user_id):
@@ -170,7 +194,7 @@ class LearningAnalytics:
 
 # ===============================================================
 # TẦNG AI LỚP 3: GIẢI THÍCH CHI TIẾT (DÙNG GOOGLE GEMINI)
-# Nhiệm vụ: Trả lời câu hỏi tại sao sai cho học sinh (S4)
+# Nhiệm vụ: Trả lời câu hỏi tại sao sai cho học sinh
 # ===============================================================
 
 def check_ai_usage(user_id, limit=20):
@@ -196,27 +220,58 @@ def get_ai_explanation(user_id, exercise_id, question, student_choice, correct_a
     """
     Hàm lõi gọi AI: Có cơ chế Cache (Lưu trữ cũ) để tiết kiệm API.
     """
-    if not question: return "Dữ liệu câu hỏi trống."
-    
+    # --- CHECK DỮ LIỆU ĐẦU VÀO ---
+    # Lý do: tránh gọi AI với dữ liệu rỗng → lỗi ngữ nghĩa, tốn API
+    if not question:
+        return "Dữ liệu câu hỏi trống."
+        # --- TẠO CACHE KEY ỔN ĐỊNH ---
+    # Lý do:
+    # - ExerciseId KHÔNG đủ để phân biệt các ngữ cảnh sai khác nhau
+    # - Cùng 1 câu hỏi nhưng học sinh có thể chọn đáp án khác
+    # => Cache phải dựa trên NGỮ CẢNH SƯ PHẠM (question + lựa chọn + đáp án đúng)
+    cache_key = f"Q::{question}|S::{student_choice}|C::{correct_answer}"
+
     conn = None
     # --- BƯỚC 1: KIỂM TRA BỘ NHỚ ĐỆM (CACHE) ---
-    # Nếu câu này đã được giải thích cho User này trước đó, lấy luôn từ DB ra.
     try:
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
+
+        # Lý do sửa câu SQL:
+        # - Trước đây chỉ check UserId + ExerciseId 
+        # - Bổ sung Prompt (= cache_key) để đảm bảo:
+        #   + Đúng câu hỏi
+        #   + Đúng đáp án học sinh chọn
+        #   + Đúng ngữ cảnh cần giải thích
         cursor.execute("""
             SELECT Prompt FROM AIRequestLogs 
-            WHERE UserId=? AND ExerciseId=? 
+            WHERE UserId=? AND ExerciseId=? AND Prompt LIKE ?
             ORDER BY CreatedAt DESC LIMIT 1
-        """, (user_id, exercise_id))
-        row = cursor.fetchone()
-        if row: return row['Prompt'] # Trả về lời giải cũ ngay lập tức
-    except Exception as e: print(f"Lỗi Cache: {e}")
-    finally:
-        if conn: conn.close()
+        """, (user_id, exercise_id, cache_key + "%"))
 
+        row = cursor.fetchone()
+
+        if row:
+            # Lý do split:
+            # - Prompt đang lưu theo dạng:
+            #   [CACHE_KEY]\n---\n[AI_REPLY]
+            # - Ta chỉ cần trả về phần AI_REPLY cho học sinh
+            return row['Prompt'].split("\n---\n", 1)[1]
+
+    except Exception as e:
+        # Lý do chỉ print:
+        # - Lỗi cache KHÔNG phải lỗi nghiêm trọng
+        # - Không nên làm gián đoạn trải nghiệm học sinh
+        print(f"Lỗi Cache: {e}")
+
+    finally:
+        if conn:
+            conn.close()
     # --- BƯỚC 2: KIỂM TRA HẠN MỨC NGÀY ---
+        # Lý do:
+    # - Ngăn học sinh spam AI
+    # - Bảo vệ chi phí API
     can_use, _ = check_ai_usage(user_id)
     if not can_use: 
         return "Bạn đã hết 20 lượt dùng AI mới trong ngày. Hãy xem lại các câu cũ đã giải nhé!"
@@ -224,8 +279,10 @@ def get_ai_explanation(user_id, exercise_id, question, student_choice, correct_a
     # --- BƯỚC 3: GỌI GOOGLE AI ---
     try:
         model = genai.GenerativeModel(MODEL_NAME)
-        # Prompt (Lời nhắc): Quyết định độ thông minh và giọng văn của AI
-        # Prompt (Lời nhắc) phiên bản "Siêu ngắn gọn"
+
+        # Lý do tách prompt AI và cache_key:
+        # - cache_key: máy đọc, để so sánh
+        # - prompt AI: người đọc, để AI sinh câu trả lời tốt
         prompt = f"""
         Bạn là gia sư Tin học vui tính. Hãy giải thích CỰC NGẮN (tối đa 3 dòng) cho học sinh:
         
@@ -238,29 +295,41 @@ def get_ai_explanation(user_id, exercise_id, question, student_choice, correct_a
         2. ✅ Tại sao đáp án kia mới đúng? (1 câu ngắn).
         3. Dùng icon (💡, 🚫, ✅) đầu dòng cho dễ đọc. Không chào hỏi rườm rà.
         """
-        
+
         response = model.generate_content(prompt)
         ai_reply = response.text
-
         # --- BƯỚC 4: LƯU LẠI NHẬT KÝ (Ghi Log) ---
         # Bọc try riêng: Nếu lưu vào DB thất bại, vẫn phải trả về ai_reply cho học sinh
         try:
             conn_log = sqlite3.connect(DB_PATH) # Tạo kết nối riêng tên là conn_log
             cursor_log = conn_log.cursor()
+            
+            # Lý do lưu cache_key + ai_reply chung 1 cột:
+            # - Không sửa cấu trúc bảng
+            # - Vẫn đảm bảo truy vết ngữ cảnh + nội dung AI
             cursor_log.execute("""
                 INSERT INTO AIRequestLogs (UserId, ExerciseId, Prompt) 
                 VALUES (?, ?, ?)
-            """, (user_id, exercise_id, ai_reply))
+            """, (
+                user_id,
+                exercise_id,
+                cache_key + "\n---\n" + ai_reply
+            ))
+
             conn_log.commit()
-            conn_log.close() # Đóng cửa conn_log ngay lập tức
+            conn_log.close()
+
         except Exception as log_error:
-            # Chỉ in lỗi ra màn hình đen (terminal) để mình biết, không báo cho học sinh
+            # Lý do không báo lỗi cho học sinh:
+            # - AI đã trả lời thành công
+            # - Lỗi lưu log không ảnh hưởng kết quả học tập
             print(f"⚠️ Lỗi lưu Log: {log_error}")
-        
-        # TRẢ VỀ KẾT QUẢ: Dù lưu log thành công hay thất bại, học sinh vẫn nhận được lời giải
+
         return ai_reply
 
     except Exception as e:
-        # Lỗi này mới là lỗi nặng (mất mạng, hết tiền API...), lúc này mới báo AI bận
+        # Lý do fallback:
+        # - Khi AI lỗi (mạng, quota...)
+        # - Học sinh vẫn biết đáp án đúng để tiếp tục học
         return f"Đáp án đúng là: {correct_answer}. (Hiện tại AI đang bận, bạn vui lòng xem lại SGK nhé!)"
     
