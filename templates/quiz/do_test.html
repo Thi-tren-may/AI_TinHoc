@@ -3,6 +3,16 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/quiz_pro.css') }}">
 
+<style>
+    /* Ngăn chặn hành vi bôi đen văn bản trên toàn bộ trang */
+    body {
+        -webkit-user-select: none; /* Safari */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+/Edge */
+        user-select: none; /* Standard */
+    }
+</style>
+
 <div class="container-fluid bg-light min-vh-100 pb-5">
     <form action="{{ url_for('test.submit_test') }}" method="POST" id="quizForm">
         
@@ -90,13 +100,52 @@
 </div>
 
 <script>
+    // 🛡️ PHẦN 2: JS CHỐNG GIAN LẬN (CẤP ĐỘ 1 - ĐÃ CÓ)
+    
+    // 1. Chặn chuột phải
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // 2. Chặn phím tắt
+    document.onkeydown = function(e) {
+        if(e.keyCode == 123) return false; // F12
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // Ctrl+Shift+J
+        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
+        if(e.ctrlKey && e.keyCode == 'C'.charCodeAt(0)) return false; // Ctrl+C
+    }
+
+    // 🔥 PHẦN 3: JS CHỐNG GIAN LẬN (CẤP ĐỘ 2 - MỚI THÊM)
+    // "BẮT QUẢ TANG" CHUYỂN TAB 
+    
+    let violationCount = 0; // Biến đếm số lần vi phạm
+    const originalTitle = document.title; // Lưu tiêu đề gốc của trang
+
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden) {
+            // 🚨 SỰ CỐ: Người dùng vừa rời khỏi tab thi (sang Facebook, Google...)
+            violationCount++;
+            
+            // Đổi tiêu đề tab thành cảnh báo (để học sinh thấy rén)
+            document.title = "⚠️ CẢNH BÁO: QUAY LẠI NGAY!";
+            
+            console.log(`Phát hiện gian lận lần thứ: ${violationCount}`);
+            
+        } else {
+            // ✅ Người dùng vừa quay lại tab thi
+            document.title = originalTitle; // Trả lại tiêu đề cũ
+            
+            // Hiện bảng cảnh báo ngay lập tức
+            alert(`⛔ CẢNH BÁO GIAN LẬN!\n\nHệ thống phát hiện bạn đã rời khỏi màn hình thi ${violationCount} lần.\n\nGiáo viên sẽ được thông báo về hành vi này. Nếu vi phạm quá nhiều, bài thi sẽ bị hủy kết quả!`);
+        }
+    });
+
+    // --- CÁC HÀM XỬ LÝ BÀI THI (GIỮ NGUYÊN) ---
+
     // 1. Hàm chọn đáp án
     function selectAnswer(questionId, option) {
-        // Tích vào radio ẩn
         const radio = document.getElementById(`radio-${questionId}-${option}`);
         if(radio) radio.checked = true;
 
-        // Đổi màu nút A,B,C,D
         const container = document.getElementById(`quest-${questionId}`);
         const buttons = container.querySelectorAll('.btn-circle');
         buttons.forEach(btn => btn.classList.remove('selected'));
@@ -105,7 +154,6 @@
             if(btn.innerText.trim() === option) btn.classList.add('selected');
         });
 
-        // Đổi màu ô số sidebar
         const sidebarBtn = document.getElementById(`idx-${questionId}`);
         if(sidebarBtn) sidebarBtn.classList.add('done');
     }
@@ -126,10 +174,9 @@
         const s = timeSeconds % 60;
         timerDisplay.innerText = `${m}:${s < 10 ? '0'+s : s}`;
         
-        // Cảnh báo khi sắp hết giờ (còn 5 phút)
         if(timeSeconds < 300) {
             timerDisplay.parentElement.style.backgroundColor = '#ffecec';
-            timerDisplay.parentElement.classList.add('shake'); // Cần thêm class rung lắc nếu muốn
+            timerDisplay.parentElement.classList.add('shake'); 
         }
     }, 1000);
 

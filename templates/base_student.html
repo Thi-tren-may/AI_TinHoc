@@ -17,28 +17,34 @@
 
         <div class="collapse navbar-collapse" id="studentNav">
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                <li class="nav-item px-1">
-                    <a class="nav-link nav-link-pro active d-flex align-items-center" href="{{ url_for('home.student_index') }}">
-                        <i class="fas fa-home me-2"></i> Trang chủ
-                    </a>
-                </li>
-                <li class="nav-item px-1">
-                    <a class="nav-link nav-link-pro d-flex align-items-center" href="{{ url_for('test.select_topic') }}">
-                        <i class="fas fa-pen-nib me-2"></i> Vào thi
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link nav-link-pro {{ 'active' if request.endpoint == 'test.history' else '' }}" 
-                    href="{{ url_for('test.history') }}">
-                        <i class="fas fa-history me-1"></i> Lịch sử thi
-                    </a>
-                </li>
-                <li class="nav-item px-1">
-                    <a class="nav-link nav-link-pro d-flex align-items-center" href="{{ url_for('ai.progress') }}">
-                        <i class="fas fa-chart-line me-1"></i> Tiến độ học tập
-                    </a>
-                </li>
-            </ul>
+    <li class="nav-item px-1">
+        <a class="nav-link nav-link-pro {{ 'active' if 'home.' in request.endpoint }}" 
+           href="{{ url_for('home.student_index') }}">
+            <i class="fas fa-home me-2"></i> Trang chủ
+        </a>
+    </li>
+
+    <li class="nav-item px-1">
+        <a class="nav-link nav-link-pro {{ 'active' if 'test.' in request.endpoint or 'quiz.' in request.endpoint }}" 
+           href="{{ url_for('test.select_topic') }}">
+            <i class="fas fa-pen-nib me-2"></i> Vào thi
+        </a>
+    </li>
+
+    <li class="nav-item px-1">
+        <a class="nav-link nav-link-pro {{ 'active' if 'report.' in request.endpoint }}" 
+           href="{{ url_for('report.view_report') }}">
+            <i class="fas fa-history me-2"></i> Lịch sử thi
+        </a>
+    </li>
+
+    <li class="nav-item px-1">
+        <a class="nav-link nav-link-pro {{ 'active' if 'ai.' in request.endpoint }}" 
+           href="{{ url_for('ai.progress') }}">
+            <i class="fas fa-chart-line me-2"></i> Tiến độ học tập
+        </a>
+    </li>
+</ul>
 
             <div class="d-flex align-items-center user-glass-card p-1 ps-3 pe-2 rounded-pill mt-3 mt-lg-0">
                 <div class="me-2 text-end d-none d-md-block lh-1">
